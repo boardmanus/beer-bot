@@ -1,0 +1,41 @@
+html, body, main {
+  font-family: Roboto,sans-serif; /* [2] */
+  height: 100%;
+  width: 100%;
+  margin: 0px;
+}
+
+header h1 {
+  width: 100%;
+  height: 50px;
+  margin: 0;
+  text-align: center;
+  background-color: #525286;
+  color: #FFFFFF;
+}
+
+#fermentation {
+  display: flex;
+  flex-flow: row;
+  justify-content: flex-end;
+  height: calc(100% - 50px);
+}
+
+#meas {
+  order: 2;
+  flex: 0 1 auto;
+  min-width: 30px;
+}
+
+#fermenter {
+  flex: 1 0 auto;
+  background: transparent;
+  font-size: 30px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+#svgimage {
+  height: 100%;
+  box-sizing: border-box;
+}
