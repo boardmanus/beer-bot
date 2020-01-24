@@ -1,3 +1,5 @@
+const config = require("./config/config.json");
+
 
 // Identifies the TILT Hydrometer available
 const TILT_UUIDS = {
@@ -49,13 +51,13 @@ const tilt = {
 
     toCloud: function(payload) {
 
-        const googleSheetTime = payload["timestamp"]/86400000.0 + 25568;
+        const googleSheetTime = payload.timestamp/86400000.0 + 25568;
 
         const cloud = {
-            "Beer": "Nashi Beer,1",
-            "Temp": payload["temperature"],
-            "SG": payload["gravity"],
-            "Color": payload["color"],
+            "Beer": config.beer.name,
+            "Temp": payload.temperature,
+            "SG": payload.gravity,
+            "Color": payload.color,
             "Comment": "",
             "Timepoint": googleSheetTime
         };

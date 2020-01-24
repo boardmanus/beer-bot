@@ -7,7 +7,7 @@ const bleaconSrc = (os.platform() == 'linux')? 'bleacon' : './bleacon-fake';
 const bleacon = require(bleaconSrc);
 const tilt = require('./tilt.js');
 const cloud = require('./cloud.js');
-
+const config = require('./config/config.json');
 
 const PORT = 3000;
 
@@ -21,7 +21,8 @@ http.listen(PORT, () => {
 });
 
 io.on('connection', () => {
-    console.log('Client connected!');
+    console.log('Client connected!', config.beer);
+    io.emit('beer-details', JSON.stringify(config.beer));
 });
 
 function handle_tilt_payload(payload) {

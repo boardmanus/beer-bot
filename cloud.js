@@ -2,16 +2,12 @@ const config = require('./config/config.json');
 const tilt = require('./tilt.js');
 const request = require('request');
 
+const CLOUD_URL = config.cloud.url;
+const CLOUD_REPORT_PERIOD_S = config.cloud.report_period_s;
+
+
 class Cloud {
     
-    static get CLOUD_URL() {
-        return config.cloud.url;
-    }
-
-    static get CLOUD_REPORT_PERIOD_S() {
-        return 30;
-    }
-
     constructor() {
         this.lastPayload = null;
     }
@@ -21,7 +17,7 @@ class Cloud {
             return true;
         }
         const dt = payload.timestamp / 1000.0 - this.lastPayload.timestamp / 1000.0;
-        return dt >= Cloud.CLOUD_REPORT_PERIOD_S;
+        return dt >= CLOUD_REPORT_PERIOD_S;
     }
 
     onPayload(payload) {
@@ -30,7 +26,7 @@ class Cloud {
             this.lastPayload = payload;
             const cloudData = tilt.toCloud(payload);
 
-            request.post(Cloud.CLOUD_URL, {
+            request.post(CLOUD_URL, {
                 qs: cloudData,
                 followAllRedirects: true 
             }, (error, res, body) => {

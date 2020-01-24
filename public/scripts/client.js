@@ -1,5 +1,14 @@
 const socket = io();
 
+
+function update_beer_details(svg, deets) {
+  const name = svg.find("#BeerName");
+  const beer = svg.find("#Beer");
+  name.text(deets.name);
+  beer.fill(deets.color);
+}
+
+
 function update_details(meas) {
   $('#temperature').text(`${meas.temperature.toFixed(1)}C`)
   $('#gravity').text(`${meas.gravity.toFixed(3)}SG`)
@@ -13,7 +22,7 @@ function update_airlock(svg, meas) {
 
 function update_tilt(svg, meas) {
   const tilt = svg.find("#Tilt");
-  const tiltText = svg.find("#TiltText");
+  const tiltText = svg.find("#TiltDetails");
 
   const text = `${meas.temperature.toFixed(1)}C, ${meas.gravity.toFixed(3)}SG`;
   tiltText.text(text);
@@ -46,12 +55,15 @@ $(document).ready(() => {
 
 
   socket.on('tilt-meas', (msg) => {
-    meas = JSON.parse(msg);
+    const meas = JSON.parse(msg);
     update_details(meas);
     update_tilt(image, meas);
     update_airlock(image, meas);
   });
+
+  socket.on('beer-details', (msg) => {
+    const deets = JSON.parse(msg);
+    console.log(`beer-details:`, deets);
+    update_beer_details(image, deets);
+  });
 });
-
-
-
