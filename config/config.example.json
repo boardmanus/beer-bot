@@ -1,0 +1,10 @@
+{
+    "cloud": {
+        "url": "http://url.to.my.cloud/",
+        "report_period_s": "300"
+    },
+    "beer": {
+        "name": "Mega Stout",
+        "color": "#000000"
+    }
+}
