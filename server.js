@@ -5,13 +5,12 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const bleaconSrc = (os.platform() == 'linux')? 'bleacon' : './bleacon-fake';
 const bleacon = require(bleaconSrc);
-const tilt = require('./tilt.js');
+const Tilt = require('./tilt.js');
+const tilt = new Tilt();
 const cloud = require('./cloud.js');
 const config = require('./config/config.json');
 
 const PORT = 3000;
-
-var last_tilt_payload = {}
 
 bleacon.on('discover', on_device_beacon);
 bleacon.startScanning();
@@ -29,17 +28,15 @@ function handle_tilt_payload(payload) {
     console.log(payload);
     io.emit('tilt-meas', JSON.stringify(payload));
     cloud.onPayload(payload);
-    last_tilt_payload = payload
+    tilt.update(payload);
 }
 
 function on_device_beacon(bleacon) {
-    const payload = tilt.fromBleacon(bleacon)
-    handle_tilt_payload(payload)
+    handle_tilt_payload(Tilt.Payload.fromBleacon(bleacon));
 }
 
 function handle_tilt_post(req, res) {
-    const payload = tilt.fromReq(req)
-    handle_tilt_payload(payload)
+    handle_tilt_payload(Tilt.Payload.fromReq(req));
     res.end("yes")
 }
 
@@ -52,6 +49,6 @@ app.use(express.static(__dirname + '/public'));
 app.post('/tilt', (req, res) => handle_tilt_post(req, res))
 app.get('/', (req, res) => {
     res.render('index', { 
-        title: 'beer-bot', tilt_payload: last_tilt_payload
+        title: 'beer-bot', tilt_payload: tilt.payload
     })
 });

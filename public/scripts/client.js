@@ -4,6 +4,7 @@ const socket = io();
 function update_beer_details(svg, deets) {
   const name = svg.find("#BeerName");
   const beer = svg.find("#Beer");
+
   name.text(deets.name);
   beer.fill(deets.color);
 }
@@ -17,6 +18,9 @@ function update_details(meas) {
 
 function update_airlock(svg, meas) {
   const liquidPath = svg.find("#Liquid");
+
+  const animation = svg.find("#Animation");
+  //animation.attr("dur", `${meas.temperature}s`);
 }
 
 
