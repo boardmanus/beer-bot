@@ -10,10 +10,38 @@ const TILT_UUIDS = {
 };
 
 
+class TiltPayload {
+
+    constructor(uuid, temperature, gravity, rssi) {
+        // Build the payload by default
+        this.uuid = uuid;
+        this.timestamp = Date.now();
+        this.temperature = temperature;
+        this.gravity = gravity;
+        this.rssi = rssi;
+
+        const color = TILT_UUIDS[uuid];
+        this.color = (color == null)? 'Invisible' : color;
+    }
+
+    static fromBleacon(bleacon) {
+        return new TiltPayload(bleacon.uuid, bleacon.major, bleacon.minor/1000.0, bleacon.rssi);
+    }
+
+    static fromReq(req) {
+        return new TiltPayload(req.uuid, req.temperature, req.gravity, req.rssi);
+    }
+};
+
+
 class Tilt {
 
     constructor() {
         this.lastPayload = null;
+    }
+
+    get Payload() {
+        return TiltPayload;
     }
 
     get payload() {
@@ -24,28 +52,6 @@ class Tilt {
         this.lastPayload = payload;
     }
     
-    static Payload = class {
-
-        constructor(uuid, temperature, gravity, rssi) {
-            // Build the payload by default
-            this.uuid = uuid;
-            this.timestamp = Date.now();
-            this.temperature = temperature;
-            this.gravity = gravity;
-            this.rssi = rssi;
-
-            const color = TILT_UUIDS[uuid];
-            this.color = (color == null)? 'Invisible' : color;
-        }
-
-        static fromBleacon(bleacon) {
-            return new Tilt.Payload(bleacon.uuid, bleacon.major, bleacon.minor/1000.0, bleacon.rssi);
-        }
-
-        static fromReq(req) {
-            return new Tilt.Payload(req.uuid, req.temperature, req.gravity, req.rssi);
-        }
-    };
 }
 
 module.exports = Tilt;

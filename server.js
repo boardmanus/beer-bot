@@ -32,11 +32,11 @@ function handle_tilt_payload(payload) {
 }
 
 function on_device_beacon(bleacon) {
-    handle_tilt_payload(Tilt.Payload.fromBleacon(bleacon));
+    handle_tilt_payload(tilt.Payload.fromBleacon(bleacon));
 }
 
 function handle_tilt_post(req, res) {
-    handle_tilt_payload(Tilt.Payload.fromReq(req));
+    handle_tilt_payload(tilt.Payload.fromReq(req));
     res.end("yes")
 }
 
