@@ -6,15 +6,15 @@ const CLOUD_REPORT_PERIOD_S = config.cloud.report_period_s;
 
 function payloadToCloud(payload) {
 
-    const googleSheetTime = this.timestamp/86400000.0 + 25568;
+    const googleSheetTime = payload.timestamp/86400000.0 + 25568;
 
     const cloud = {
-        "Beer": config.beer.name,
-        "Temp": this.temperature,
-        "SG": this.gravity,
-        "Color": this.color,
-        "Comment": "",
-        "Timepoint": googleSheetTime
+        Beer: config.beer.name,
+        Temp: payload.temperature,
+        SG: payload.gravity,
+        Color: payload.color,
+        Comment: "",
+        Timepoint: googleSheetTime
     };
 
     return cloud;    
