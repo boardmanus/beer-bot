@@ -1,8 +1,12 @@
+function c_to_f(c) {
+    return c * 9.0 / 5.0 + 32
+}
+
 class Bleacon {
 
     constructor() {
         this.uuid = 'a495bb40c5b14b44b5121370f02d74de';
-        this.major = 21.1; // temperature
+        this.major = c_to_f(21.1); // temperature
         this.minor = 1060.0; // gravity
         this.rssi = 30;
         this.callbacks = {};

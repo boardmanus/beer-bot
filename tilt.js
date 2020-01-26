@@ -10,13 +10,18 @@ const TILT_UUIDS = {
 };
 
 
+function f_to_c(f) {
+    return (f - 32.0) * 5.0/9.0;
+}
+
+
 class TiltPayload {
 
     constructor(uuid, temperature, gravity, rssi) {
         // Build the payload by default
         this.uuid = uuid;
         this.timestamp = Date.now();
-        this.temperature = temperature;
+        this.temperature = f_to_c(temperature);
         this.gravity = gravity;
         this.rssi = rssi;
 
