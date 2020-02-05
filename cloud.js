@@ -1,20 +1,24 @@
 const config = require('./config/config.json');
 const request = require('request');
+const Utils = require('./utils.js');
 
 const CLOUD_URL = config.cloud.url;
 const CLOUD_REPORT_PERIOD_S = config.cloud.report_period_s;
 
-function payloadToCloud(payload) {
 
-    const googleSheetTime = payload.timestamp/86400000.0 + 25568;
+function timestamp_to_googlesheettime(t) {
+    return t/86400000.0 + 25568;
+}
+
+function payloadToCloud(payload) {
 
     const cloud = {
         Beer: config.beer.name,
-        Temp: payload.temperature,
-        SG: payload.gravity,
+        Temp: Utils.c_to_f(payload.ftemperature),
+        SG: payload.fgravity,
         Color: payload.color,
         Comment: "",
-        Timepoint: googleSheetTime
+        Timepoint: timestamp_to_googlesheettime(payload.timestamp)
     };
 
     return cloud;    

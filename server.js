@@ -24,11 +24,20 @@ io.on('connection', () => {
     io.emit('beer-details', JSON.stringify(config.beer));
 });
 
+io.on('update-details', (msg) => {
+    const deets = JSON.parse(msg);
+    console.log(`update-details:`, deets);
+});
+
 function handle_tilt_payload(payload) {
-    console.log(payload);
-    io.emit('tilt-meas', JSON.stringify(payload));
-    cloud.onPayload(payload);
-    tilt.update(payload);
+    if (tilt.Payload.isValid(payload)) {
+        tilt.update(payload);
+        io.emit('tilt-meas', JSON.stringify(tilt.payload));
+        cloud.onPayload(tilt.payload);
+    }
+    else {
+        console.log("Invalid payload:", payload);
+    }
 }
 
 function on_device_beacon(bleacon) {
