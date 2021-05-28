@@ -22,6 +22,10 @@ class Utils {
         return (og - g) * 131.25;
     }
 
+    static rgba_style(rgb, a) {
+        return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`;
+    }
+
     static srm_to_rgb(srm) {
         // Returns an RGB value based on SRM
         var r = 0, g = 0, b = 0;

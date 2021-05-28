@@ -8,11 +8,13 @@ const socket = io();
 
 const utils = require('./utils.js');
 
+
 const DEFAULT_BEER_DETAILS = {
   name: "Beer",
   color_srm: 23.1,
   og: 1.010
 };
+
 
 const DEFAULT_MEAS = {
   color: "Black",
@@ -25,6 +27,7 @@ const DEFAULT_MEAS = {
   uuid: "-"
 };
 
+
 const TILT_COLOR_TO_FILL = {
   "Red": "#f27373",
   "Purple": "#ba73f2",
@@ -35,115 +38,96 @@ const TILT_COLOR_TO_FILL = {
   "Orange": "#f2ba73"
 }
 
+
 var lastBeerDetails = DEFAULT_BEER_DETAILS;
 var lastTiltMeas = DEFAULT_MEAS;
+
 
 function is_valid_beer_name(name) {
   return name.length > 0 && name.length < 64;
 }
 
+
 function is_valid_beer_color(srm) {
   return srm >= 0.0 && srm <= 200.0;
 }
+
 
 function is_valid_beer_og(og) {
   return og >= 1.0 && og <= 1.150;
 }
 
-function validate_beer_name(name, fallbackName) {
-  return is_valid_beer_name(name) ? name : fallbackName;
-}
 
-function validate_beer_color(srm, fallback) {
-  return is_valid_beer_color(srm) ? srm : fallback;
-}
-
-function validate_beer_og(og, fallback) {
-  return is_valid_beer_og(og) ? og : fallback;
-}
-
-function update_beer_name(name, svg) {
-  const beername = $('#beername');
-  if (!is_valid_beer_name(name)) {
-    if (!beername.hasClass('invalid')) {
-      beername.addClass('invalid');
-    }
-    return;
+function validate_data(data, is_valid_func, input) {
+  const valid = is_valid_func(data);
+  if (valid) {
+    input.removeClass('invalid');
+    input.val(data);
   }
-
-  beername.removeClass('invalid');
-  beername.val(name);
-
-  const svgname = svg.find("#BeerName");
-  svgname.text(name);
-}
-
-function update_beer_color(srm, svg) {
-  const beercolor = $('#beercolor');
-  if (!is_valid_beer_color(srm)) {
-    if (!beercolor.hasClass('invalid')) {
-      beercolor.addClass('invalid');
+  else {
+    if (!input.hasClass('invalid')) {
+      input.addClass('invalid');
     }
-    return;
   }
-
-  const beerRgb = utils.srm_to_rgb(srm);
-
-  beercolor.removeClass('invalid');
-  beercolor.val(srm);
-  //beercolor.css({ 'background-color': `rgba(${beerRgb[0]},${beerRgb[1]},${beerRgb[2]},0.1)` });
-
-  const beer = svg.find("#Beer");
-  const beerColor = `rgba(${beerRgb[0]},${beerRgb[1]},${beerRgb[2]},1.0)`
-  beer.fill(beerColor);
+  return valid;
 }
 
-function update_beer_og(og) {
-  const beerog = $('#og');
-  if (!is_valid_beer_og(og)) {
-    if (!beerog.hasClass('invalid')) {
-      beerog.addClass('invalid');
+
+function update_beer_name(name, beerNameInput, svgBeerName) {
+  if (validate_data(name, is_valid_beer_name, beerNameInput)) {
+    if (svgBeerName) {
+      svgBeerName.text(name);
     }
-    return;
   }
-
-  beerog.removeClass('invalid');
-  beerog.val(og);
 }
 
-function update_beer_details(svg, deets) {
+
+function update_beer_color(srm, beerColorInput, svgBeer) {
+  if (validate_data(srm, is_valid_beer_color, beerColorInput)) {
+    if (svgBeer) {
+      const beerRgb = utils.srm_to_rgb(srm);
+      svgBeer.fill(utils.rgba_style(beerRgb, 1.0));
+      beerColorInput.css({ 'background-color': utils.rgba_style(beerRgb, 0.3) });
+    }
+  }
+  else {
+    beerColorInput.css({ 'background-color': '' });
+  }
+}
+
+
+function update_beer_og(og, beerog) {
+  validate_data(og, is_valid_beer_og, beerog);
+}
+
+
+function update_beer_details(jist, deets) {
   console.log('update-beer-details: ', deets);
-  update_beer_name(deets.name, svg);
-  update_beer_color(deets.color_srm, svg);
-  update_beer_og(deets.og);
-
+  update_beer_name(deets.name, jist.beerName, jist.svgBeerName);
+  update_beer_color(deets.color_srm, jist.beerColor, jist.svgBeer);
+  update_beer_og(deets.og, jist.beerOg);
   lastBeerDetails = deets;
 }
 
 
-function update_meas(meas) {
-  $('#temperature').text(`${meas.temperature.toFixed(1)}C`)
-  $('#gravity').text(`${meas.gravity.toFixed(3)}SG`)
+function update_meas(jist, meas) {
+  jist.beerTemperature.text(`${meas.temperature.toFixed(1)}C`)
+  jist.beerGravity.text(`${meas.gravity.toFixed(3)}SG`)
   lastTiltMeas = meas;
 }
 
 
-function update_airlock(svg, meas) {
-  const liquidPath = svg.find("#Liquid");
-  const animation = svg.find("#Animation");
-  //animation.attr("dur", `${meas.temperature}s`);
+function update_airlock(jist, meas) {
+  //jist.svgAnimation.attr("dur", `${meas.temperature}s`);
 }
 
 
-function update_tilt(svg, meas) {
-  const tilt = svg.find("#Tilt");
-  const tiltText = svg.find("#TiltDetails");
-  const tiltFrame = svg.find("#TiltFrame");
+function update_tilt(jist, meas) {
 
-  tiltFrame.fill(TILT_COLOR_TO_FILL[meas.color]);
+  jist.svgTiltFrame.fill(TILT_COLOR_TO_FILL[meas.color]);
 
   const text = `${meas.temperature.toFixed(1)}C, ${meas.gravity.toFixed(3)}SG`;
-  tiltText.text(text);
+  jist.svgTiltText.text(text);
 
   var tiltAngle = 10.0 + (meas.gravity - 1.000)*600.0;
   if (tiltAngle > 70.0) {
@@ -151,71 +135,88 @@ function update_tilt(svg, meas) {
   }
   
   const newRotation = 90.0 - tiltAngle;
-  tilt.attr('transform', `translate(38, 78) rotate(${newRotation})`);
+  jist.svgTilt.attr('transform', `translate(38, 78) rotate(${newRotation})`);
 }
 
 
-function update_fermenter_tilt(image, meas) {
-  update_meas(meas);
-  update_tilt(image, meas);
-  update_airlock(image, meas);
+function update_fermenter_tilt(jist, meas) {
+  update_meas(jist, meas);
+  update_tilt(jist, meas);
+  update_airlock(jist, meas);
 }
 
 
-function update_fermenter_svg(image, contents) {
-  const tmp = $('svg', contents);
-  image.svg(tmp.html());
-  image.viewbox(0, 0, 80, 130);
+function update_fermenter_svg(jist, contents) {
+  const svgContents = $('svg', contents).html();
+  jist.image.svg(svgContents);
+  jist.image.viewbox(0, 0, 80, 130);
 
-  update_beer_details(image, lastBeerDetails);
-  update_fermenter_tilt(image, lastTiltMeas);
+  jist.svgBeer = jist.image.find('#Beer');
+  jist.svgBeerName = jist.image.find('#BeerName');
+  jist.svgTilt = jist.image.find("#Tilt");
+  jist.svgTiltText = jist.image.find("#TiltDetails");
+  jist.svgTiltFrame = jist.image.find("#TiltFrame");
+  jist.svgLiquidPath = jist.image.find("#Liquid");
+  jist.svgAnimation = jist.image.find("#Animation");
+
+  update_beer_details(jist, lastBeerDetails);
+  update_fermenter_tilt(jist, lastTiltMeas);
 }
 
 
-function submit_beer_details(svg) {
-  const beerName = $('#beername').val();
-  const beerColorSrm = $('#beercolor').val();
-  const beerOg = $('#og').val();
+function submit_beer_details(jist) {
+  const beerName = jist.beerName.val();
+  const beerColorSrm = jist.beerColor.val();
+  const beerOg = jist.beerOg.val();
 
-  update_beer_name(beerName, svg);
-  update_beer_color(beerColorSrm, svg);
-  update_beer_og(beerOg);
+  update_beer_name(beerName, jist.beerName, jist.svgBeerName);
+  update_beer_color(beerColorSrm, jist.beerColor, jist.svgBeer);
+  update_beer_og(beerOg, jist.beerOg);
 
   //socket.emit('update-details', JSON.stringify({ deets }));
 }
 
 
 $(() => {
-  const image = SVG('#svgimage');
+
+  const jist = {
+    image: SVG('#svgimage'),
+    beerName: $('#beername'),
+    beerColor: $('#beercolor'),
+    beerOg: $('#og'),
+    beerSubmit: $('#beersubmit'),
+    beerTemperature: $('#temperature'),
+    beerGravity: $('#gravity')
+  }
 
   $.get('/images/fermenter.svg', (content) => {
-    update_fermenter_svg(image, content)
+    update_fermenter_svg(jist, content);
   }, 'xml');
 
-  $('#beername').on('keyup change', () => {
-    update_beer_name($('#beername').val(), image)
+  jist.beerName.on('keyup change', () => {
+    update_beer_name(jist.beerName.val(), jist.beerName, jist.svgBeerName)
   });
 
-  $('#beercolor').on('keyup change', () => {
-    update_beer_color($('#beercolor').val(), image)
+  jist.beerColor.on('keyup change', () => {
+    update_beer_color(jist.beerColor.val(), jist.beerColor, jist.svgBeer)
   });
 
-  $('#og').on('keyup change', () => {
-    update_beer_og($('#og').val())
+  jist.beerOg.on('keyup change', () => {
+    update_beer_og(jist.beerOg.val(), jist.beerOg)
   });
 
-  $('#beersubmit').on('click', () => {
-    submit_beer_details(image);
+  jist.beerSubmit.on('click', () => {
+    submit_beer_details(jist);
     return false;
   });
 
   socket.on('tilt-meas', (msg) => {
     const meas = JSON.parse(msg);
-    update_fermenter_tilt(image, meas);
+    update_fermenter_tilt(jist, meas);
   });
 
   socket.on('beer-details', (msg) => {
     const deets = JSON.parse(msg);
-    update_beer_details(image, deets);
+    update_beer_details(jist, deets);
   });
 });
