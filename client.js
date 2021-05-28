@@ -6,9 +6,11 @@ registerWindow(window, document);
 const io = require('socket.io-client');
 const socket = io();
 
+const utils = require('./utils.js');
+
 const DEFAULT_BEER_DETAILS = {
   name: "Beer",
-  color: "#d97556",
+  color_srm: 23.1,
   og: 1.010
 };
 
@@ -37,9 +39,9 @@ var lastBeerDetails = DEFAULT_BEER_DETAILS;
 var lastTiltMeas = DEFAULT_MEAS;
 
 
-function submit_beer_details(beerName, beerColor, beerOg) {
+function submit_beer_details(beerName, beerColorSrm, beerOg) {
   socket.emit('update-details', JSON.stringify({
-    name: beerName, color: beerColor, og: beerOg
+    name: beerName, color_srm: beerColorSrm, og: beerOg
   }));
   return false;
 }
@@ -49,8 +51,18 @@ function update_beer_details(svg, deets) {
   console.log('update-beer-details: ', deets);
   const name = svg.find("#BeerName");
   const beer = svg.find("#Beer");
+  const beerSrm = ('color_srm' in deets) ? deets.color_srm : 10.0;
+  const beerRgb = utils.srm_to_rgb(beerSrm);
+  const beerColor = `rgba(${beerRgb[0]},${beerRgb[1]},${beerRgb[2]},1.0)`
+
   name.text(deets.name);
-  beer.fill(deets.color);
+  beer.fill(beerColor);
+
+  $('#beername').val(deets.name);
+  $('#beercolor').val(deets.color_srm);
+  $('#beercolor').css({ 'background-color': `rgba(${beerRgb[0]},${beerRgb[1]},${beerRgb[2]},0.1)` });
+  $('#og').val(deets.og);
+
   lastBeerDetails = deets;
 }
 
