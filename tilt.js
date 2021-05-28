@@ -1,5 +1,4 @@
 const Utils = require('./utils.js');
-const config = require('./config/config.json');
 
 
 // Identifies the TILT Hydrometer available

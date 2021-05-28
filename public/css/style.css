@@ -39,3 +39,7 @@ header h1 {
   height: 100%;
   box-sizing: border-box;
 }
+
+.invalid {
+  background-color: rgb(255, 0, 0, 0.3);
+}

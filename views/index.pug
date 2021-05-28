@@ -8,18 +8,18 @@ html
             header
                 h1 #{title}
             #fermentation
-                form#details(onsubmit="return submit_beer_details(this['beername'].value, this['beercolor'].value);", method="post")
+                form#details
                     label(for='beername') Beer:
-                    input#beername.form-control(type='text', placeholder='Beerzie' name='beername')
+                    input#beername.form-control(type='text', placeholder='Beerzie', name='beername')
                     label(for='beercolor') Color (SRM):
-                    input#beercolor.form-control(type='number', placeholder='SRM' name='beercolor')
+                    input#beercolor.form-control(type='number', placeholder='SRM', name='beercolor', step='0.1', min='0.0', max='200.0')
                     label(for='og') Original Gravity:
-                    input#og.form-control(type='number', placeholder='OG' name='og')
-                    button.btn(type='submit') Update
+                    input#og.form-control(type='number', placeholder='OG', name='og', step='0.001', min='1.000', max='1.150')
+                    button#beersubmit.btn(type='button', name='submit') Update
                 #meas
                     #temperature -
                     #gravity -
                     #abv -
                 #fermenter
-                    svg(id='svgimage')
+                    svg#svgimage
         script(src='/scripts/client.js')
