@@ -16,7 +16,7 @@ bleacon.on('discover', on_device_beacon);
 bleacon.startScanning();
 
 http.listen(PORT, () => {
-    console.log(`Example app listening on port ${PORT}!`)
+    console.log(`Beer-Bot listening on port ${PORT}!`)
 });
 
 io.on('connection', () => {

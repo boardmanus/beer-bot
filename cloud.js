@@ -2,6 +2,7 @@ const config = require('./config/config.json');
 const request = require('request');
 const Utils = require('./utils.js');
 
+const CLOUD_ENABLED = config.cloud.enabled;
 const CLOUD_URL = config.cloud.url;
 const CLOUD_REPORT_PERIOD_S = config.cloud.report_period_s;
 
@@ -9,6 +10,7 @@ const CLOUD_REPORT_PERIOD_S = config.cloud.report_period_s;
 function timestamp_to_googlesheettime(t) {
     return t/86400000.0 + 25568;
 }
+
 
 function payloadToCloud(payload) {
 
@@ -32,6 +34,10 @@ class Cloud {
     }
 
     reportToCloud(payload) {
+        if (!CLOUD_ENABLED) {
+            return false;
+        }
+        
         if (this.lastReportedPayload == null) {
             return true;
         }

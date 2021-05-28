@@ -17,6 +17,10 @@ class Utils {
     static noise(factor) {
         return (Math.random() - 0.5)*factor;
     }
+
+    static gravity_to_abv(og, g) {
+        return (og - g) * 131.25;
+    }
 }
 
 module.exports = Utils;

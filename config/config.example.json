@@ -1,10 +1,12 @@
 {
     "cloud": {
+        "enabled": false,
         "url": "http://url.to.my.cloud/",
         "report_period_s": "300"
     },
     "beer": {
         "name": "Mega Stout",
-        "color": "#000000"
+        "color": "#000000",
+        "og": 1.060
     }
 }

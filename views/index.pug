@@ -8,12 +8,18 @@ html
             header
                 h1 #{title}
             #fermentation
+                form#details(onsubmit="return submit_beer_details(this['beername'].value, this['beercolor'].value);", method="post")
+                    label(for='beername') Beer:
+                    input#beername.form-control(type='text', placeholder='Beerzie' name='beername')
+                    label(for='beercolor') Color (SRM):
+                    input#beercolor.form-control(type='number', placeholder='SRM' name='beercolor')
+                    label(for='og') Original Gravity:
+                    input#og.form-control(type='number', placeholder='OG' name='og')
+                    button.btn(type='submit') Update
                 #meas
                     #temperature -
                     #gravity -
+                    #abv -
                 #fermenter
                     svg(id='svgimage')
-        script(src='https://code.jquery.com/jquery-1.11.1.js')
-        script(src='/socket.io/socket.io.js')
-        script(src='https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js')
         script(src='/scripts/client.js')

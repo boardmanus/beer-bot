@@ -4,7 +4,8 @@
   "description": "Records information and displays information from a tilt.",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "build": "browserify client.js -d -o public/scripts/client.js"
   },
   "keywords": [
     "tilt",
@@ -14,10 +15,22 @@
   "license": "ISC",
   "dependencies": {
     "bleacon": "*",
+    "@svgdotjs/svg.js": "^3.0.16",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
-    "pug": "^2.0.4",
-    "request": "^2.88.0",
+    "jquery": "^3.4.1",
+    "pug": "^3.0.2",
+    "request": "^2.88.2",
     "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "browserify": "^16.5.1",
+    "nodemon": "^2.0.4",
+    "sourceify": "^1.0.0"
+  },
+  "browserify": {
+    "transform": [
+      "sourceify"
+    ]
   }
 }
