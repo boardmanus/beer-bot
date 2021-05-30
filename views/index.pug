@@ -9,13 +9,17 @@ html
                 h1 #{title}
             #fermentation
                 form#details
-                    label(for='beername') Beer:
-                    input#beername.form-control(type='text', placeholder='Beerzie', name='beername')
-                    label(for='beercolor') Color (SRM):
-                    input#beercolor.form-control(type='number', placeholder='SRM', name='beercolor', step='0.1', min='0.0', max='200.0')
-                    label(for='og') Original Gravity:
-                    input#og.form-control(type='number', placeholder='OG', name='og', step='0.001', min='1.000', max='1.150')
-                    button#beersubmit.btn(type='button', name='submit') Update
+                    div.line
+                        label(for='beername') Beer:
+                        input#beername.form-control(type='text', placeholder='Beerzie', name='beername')
+                    div.line
+                        label(for='beercolor') Color (SRM):
+                        input#beercolor.form-control(type='number', placeholder='SRM', name='beercolor', step='0.1', min='0.0', max='200.0')
+                    div.line
+                        label(for='og') Original Gravity:
+                        input#og.form-control(type='number', placeholder='OG', name='og', step='0.001', min='1.000', max='1.150')
+                    div.line
+                        button#beersubmit.btn(type='button', name='submit') Update
                 #meas
                     #temperature -
                     #gravity -

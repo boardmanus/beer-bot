@@ -40,6 +40,29 @@ header h1 {
   box-sizing: border-box;
 }
 
+#details {
+  border: solid 2px;
+  margin: 2px;
+  padding: 2px;
+  height: fit-content;
+}
+
+#beersubmit {
+  float: right;
+}
+
+.line {
+  padding: 2px;
+}
+
+.line input {
+  float: right;
+}
+
+.line label {
+  padding-right: 5px;
+}
+
 .invalid {
   background-color: rgb(255, 0, 0, 0.3);
 }

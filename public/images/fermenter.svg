@@ -40,7 +40,7 @@
      width="75"
      id="Beer"
      fill="#d97556"
-     style="fill-opacity:0.88118807;stroke:black;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+     style="fill-opacity:0.9;stroke:black;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
   <path
      id="Fermenter"
      d="M 28,48 H 18 L 2,63 v 65 H 77 V 63 L 57,48 h -8"
@@ -52,6 +52,12 @@
       width="75"
       style="font-size:8;fill:white;fill-opacity:0.5;stroke:black;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1.0;font-family:sans-serif;text-align:center;text-anchor:middle;">
       <tspan id="BeerName">Beer</tspan>
+    </text>   
+    <text
+      y="84"
+      x="69"
+      style="font-size:6;fill:white;fill-opacity:0.5;stroke:black;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1.0;font-family:sans-serif;text-align:center;text-anchor:middle;">
+      <tspan id="BeerAbv"></tspan>
     </text>
   </g>
   <g id="Tilt" transform="translate(38, 78) rotate(90)">

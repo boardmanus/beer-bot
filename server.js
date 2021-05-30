@@ -1,8 +1,7 @@
 const os = require('os');
+const fs = require('fs');
 const express = require('express');
 const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
 const bleaconSrc = (os.platform() == 'linux')? 'bleacon' : './bleacon-fake';
 const bleacon = require(bleaconSrc);
 const Tilt = require('./tilt.js');
@@ -15,7 +14,24 @@ const PORT = 3000;
 bleacon.on('discover', on_device_beacon);
 bleacon.startScanning();
 
-http.listen(PORT, () => {
+var server;
+if (config.server.useHttps) {
+    const httpsOpts = {
+        key: fs.readFileSync('./config/key.pem'),
+        cert: fs.readFileSync('./config/cert.pem')
+    };
+
+    const https = require('https');
+    server = https.createServer(httpsOpts, app);
+}
+else {
+    const http = require('http');
+    server = http.createServer(app);
+}
+
+const io = require('socket.io')(server);
+
+server.listen(PORT, () => {
     console.log(`Beer-Bot listening on port ${PORT}!`)
 });
 

@@ -7,6 +7,7 @@ const io = require('socket.io-client');
 const socket = io();
 
 const utils = require('./utils.js');
+const { gravity_to_abv } = require('./utils.js');
 
 
 const DEFAULT_BEER_DETAILS = {
@@ -109,10 +110,22 @@ function update_beer_details(jist, deets) {
   lastBeerDetails = deets;
 }
 
+function update_beer_abv(og, g, beerAbv, svgBeerAbv) {
+  if (og && g && og > g) {
+    const abv = `${gravity_to_abv(og, g).toFixed(1)}%`;
+    beerAbv.text(abv);
+    svgBeerAbv.text(abv);
+  }
+  else {
+    beerAbv.text('-');
+    svgBeerAbv.text('');
+  }
+}
 
 function update_meas(jist, meas) {
-  jist.beerTemperature.text(`${meas.temperature.toFixed(1)}C`)
-  jist.beerGravity.text(`${meas.gravity.toFixed(3)}SG`)
+  jist.beerTemperature.text(`${meas.temperature.toFixed(1)}C`);
+  jist.beerGravity.text(`${meas.gravity.toFixed(3)}SG`);
+  update_beer_abv(jist.beerOg.val(), meas.gravity, jist.beerAbv, jist.svgBeerAbv);
   lastTiltMeas = meas;
 }
 
@@ -153,6 +166,7 @@ function update_fermenter_svg(jist, contents) {
 
   jist.svgBeer = jist.image.find('#Beer');
   jist.svgBeerName = jist.image.find('#BeerName');
+  jist.svgBeerAbv = jist.image.find('#BeerAbv');
   jist.svgTilt = jist.image.find("#Tilt");
   jist.svgTiltText = jist.image.find("#TiltDetails");
   jist.svgTiltFrame = jist.image.find("#TiltFrame");
@@ -172,6 +186,7 @@ function submit_beer_details(jist) {
   update_beer_name(beerName, jist.beerName, jist.svgBeerName);
   update_beer_color(beerColorSrm, jist.beerColor, jist.svgBeer);
   update_beer_og(beerOg, jist.beerOg);
+  update_beer_abv(beerOg, lastTiltMeas.gravity, jist.beerAbv, jist.svgBeerAbv);
 
   //socket.emit('update-details', JSON.stringify({ deets }));
 }
@@ -186,7 +201,8 @@ $(() => {
     beerOg: $('#og'),
     beerSubmit: $('#beersubmit'),
     beerTemperature: $('#temperature'),
-    beerGravity: $('#gravity')
+    beerGravity: $('#gravity'),
+    beerAbv: $('#abv')
   }
 
   $.get('/images/fermenter.svg', (content) => {
