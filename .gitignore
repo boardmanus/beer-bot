@@ -3,3 +3,5 @@ node_modules
 config/config.json
 config/*.pem
 package-lock.json
+dist-client/
+dist-server/
