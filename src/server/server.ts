@@ -1,3 +1,9 @@
+import { Tilt } from './tilt';
+import { cloud } from './cloud';
+import bleacon from './bleacon-fake';
+import * as config from '../config/config.json';
+import { TiltPayload } from '../common/tiltpayload';
+
 import * as fs from 'fs';
 import path from 'path';
 import * as https from 'https';
@@ -6,14 +12,7 @@ import { Server } from 'socket.io';
 import express from 'express';
 const app = express();
 
-import bleacon from './bleacon-fake';
-
-import { Tilt } from './tilt';
 const tilt = new Tilt();
-
-import { cloud } from './cloud';
-import * as config from '../../config/config.json';
-import { TiltPayload } from '../common/tiltpayload';
 
 const PORT = 3000;
 
@@ -49,7 +48,7 @@ io.on('update-details', (msg: any) => {
 });
 
 function handle_tilt_payload(payload: TiltPayload) {
-  if (tilt.Payload.isValid(payload)) {
+  if (payload.isValid()) {
     tilt.update(payload);
     io.emit('tilt-meas', JSON.stringify(tilt.payload));
     cloud.onPayload(tilt.payload);
@@ -59,11 +58,11 @@ function handle_tilt_payload(payload: TiltPayload) {
 }
 
 function on_device_beacon(bleacon: any) {
-  handle_tilt_payload(tilt.Payload.fromBleacon(bleacon));
+  handle_tilt_payload(TiltPayload.fromBleacon(bleacon));
 }
 
 function handle_tilt_post(req: any, res: any) {
-  handle_tilt_payload(tilt.Payload.fromReq(req));
+  handle_tilt_payload(TiltPayload.fromReq(req));
   res.end('yes');
 }
 
@@ -71,7 +70,7 @@ app.set('view engine', 'pug');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../public')));
 
 app.post('/tilt', (req: any, res: any) => handle_tilt_post(req, res));
 app.get('/', (req: any, res: any) => {

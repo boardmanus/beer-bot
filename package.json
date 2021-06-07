@@ -1,16 +1,22 @@
 {
   "name": "beerbot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Records information and displays information from a tilt.",
-  "main": "dist-server/src/server/server.js",
+  "main": "dist-server/server/server.js",
   "scripts": {
-    "prestart": "npm run build",
-    "start": "nodemon --watch dist-server dist-server/src/server/server.js",
-    "transpile": "tsc --build src/server src/client",
-    "prebuild": "npm run transpile",
-    "build": "browserify dist-client/client/client.js -d -o public/scripts/client.js",
-    "prebuild-prod": "npm run transpile",
-    "build-prod": "browserify dist-client/client/client.ts -p tinyify -d -o public/scripts/client.js"
+    "build:server": "tsc --build src/server",
+    "build:client": "tsc --build src/client",
+    "build:bro-dev": "browserify dist-client/client/client.js -d -o dist-server/public/scripts/client.js",
+    "build:bro-pro": "browserify dist-client/client/client.js -p tinyify -d -o dist-server/public/scripts/client.js",
+    "build:clean": "rm -r dist-server dist-client",
+    "build:copyassets": "cp -rf public dist-server/public",
+    "build:dev": "npm-run-all build:server build:client build:copyassets build:bro-dev",
+    "build:pro": "npm-run-all build:server build:client build:copyassets build:bro-pro",
+    "build": "if test \"$NODE_ENV\" = \"production\"; then npm run build:pro; else npm run build:dev; fi ",
+    "dev:run": "node .",
+    "dev:start": "npm-run-all build dev:run",
+    "dev": "nodemon --watch src -e ts --exec npm run dev:start",
+    "prod": "dev:start"
   },
   "keywords": [
     "tilt",
@@ -40,6 +46,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",
     "nodemon": "^2.0.4",
+    "npm-run-all": "^4.1.5",
     "prettier": "^2.3.1",
     "sourceify": "^1.0.0",
     "tinyify": "^3.0.0"

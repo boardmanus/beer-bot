@@ -1,7 +1,7 @@
 node_modules
 .vscode/
-config/config.json
-config/*.pem
+src/config/config.json
+src/config/*.pem
 package-lock.json
 dist-client/
 dist-server/

@@ -1,5 +1,5 @@
 import { Utils } from '../common/utils';
-import * as config from '../../config/config.json';
+import * as config from '../config/config.json';
 
 let Bleacon: any;
 if (!config.debug.fakeBleacon) {

@@ -10,7 +10,7 @@
         "outDir": "../../dist-server",
         "baseUrl": ".",
         "paths": {
-            "config/*": ["../../config/*"],
+            "config/*": ["../config/*"],
             "common/*": ["../common/*"]
         }
     },

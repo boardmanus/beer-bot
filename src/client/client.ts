@@ -1,12 +1,12 @@
+import { TiltPayload } from '../common/tiltpayload';
+import { Utils } from '../common/utils';
 import $ from 'jquery';
-import { TiltPayload } from 'common/tiltpayload';
+import io from 'socket.io-client';
 import { SVG, registerWindow } from '@svgdotjs/svg.js';
+
 registerWindow(window, document);
 
-import io from 'socket.io-client';
 const socket = io();
-
-import { Utils } from '../common/utils';
 
 const DEFAULT_BEER_DETAILS = {
   name: 'Beer',
@@ -14,16 +14,7 @@ const DEFAULT_BEER_DETAILS = {
   og: 1.01
 };
 
-const DEFAULT_MEAS: TiltPayload = {
-  color: 'Black',
-  fgravity: 1.01,
-  ftemperature: 20.0,
-  gravity: 1.01,
-  rssi: 0.0,
-  temperature: 20.0,
-  timestamp: 0,
-  uuid: '-'
-};
+const DEFAULT_MEAS: TiltPayload = new TiltPayload('-', 20.0, 1.01, 0.0);
 
 const TILT_COLOR_TO_FILL: { [color: string]: string } = {
   Red: '#f27373',

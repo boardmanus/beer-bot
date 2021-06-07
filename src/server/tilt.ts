@@ -11,15 +11,11 @@ class Tilt {
     this.lastPayload = null;
   }
 
-  get Payload() {
-    return TiltPayload;
-  }
-
-  get payload() {
+  get payload(): TiltPayload {
     return this.lastPayload;
   }
 
-  update(payload: TiltPayload) {
+  update(payload: TiltPayload): TiltPayload {
     if (this.lastPayload != null) {
       const dt = (payload.timestamp - this.lastPayload.timestamp) / 1000.0;
 
@@ -38,6 +34,7 @@ class Tilt {
       );
     }
     this.lastPayload = payload;
+    return payload;
   }
 }
 

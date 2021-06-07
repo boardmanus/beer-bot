@@ -1,4 +1,4 @@
-import { Utils } from '../common/utils';
+import { Utils } from './utils';
 
 type TiltColor =
   | 'Green'
@@ -47,13 +47,13 @@ class TiltPayload {
     this.color = TILT_UUIDS[uuid];
   }
 
-  static isValid(tilt: TiltPayload) {
+  isValid(): boolean {
     return (
-      tilt.color != null &&
-      tilt.temperature < 100.0 &&
-      tilt.temperature > 0.0 &&
-      tilt.gravity < 1.2 &&
-      tilt.gravity > 0.9
+      this.color != null &&
+      this.temperature < 100.0 &&
+      this.temperature > 0.0 &&
+      this.gravity < 1.2 &&
+      this.gravity > 0.9
     );
   }
 
