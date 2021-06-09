@@ -1,4 +1,10 @@
 {
+    "server": {
+        "useHttps": false
+    },
+    "debug": {
+        "fakebleacon": false
+    },
     "cloud": {
         "enabled": false,
         "url": "http://url.to.my.cloud/",

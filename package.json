@@ -16,7 +16,6 @@
   "license": "ISC",
   "dependencies": {
     "@svgdotjs/svg.js": "^3.0.16",
-    "bleacon": "*",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "jquery": "^3.4.1",
@@ -26,7 +25,7 @@
   },
   "devDependencies": {
     "browserify": "^16.5.1",
-    "nodemon": "^2.0.4",
+    "nodemon": "^2.0.7",
     "sourceify": "^1.0.0",
     "tinyify": "^3.0.0"
   },
