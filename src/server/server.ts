@@ -16,11 +16,19 @@ const tilt = new Tilt();
 
 const PORT = 3000;
 
-bleacon.on('discover', on_device_beacon);
-bleacon.startScanning();
+bleacon.onadvertisement = on_device_beacon;
 
-let server: any;
-if (config.server.useHttps) {
+bleacon
+  .startScan()
+  .then(() => {
+    console.log('Started to scan.');
+  })
+  .catch((error: unknown) => {
+    console.error(error);
+  });
+
+let server: https.Server | http.Server;
+if (config?.server?.useHttps) {
   const httpsOpts = {
     key: fs.readFileSync('./config/key.pem'),
     cert: fs.readFileSync('./config/cert.pem')
@@ -42,7 +50,7 @@ io.on('connection', () => {
   io.emit('beer-details', JSON.stringify(config.beer));
 });
 
-io.on('update-details', (msg: any) => {
+io.on('update-details', (msg: string) => {
   const deets = JSON.parse(msg);
   console.log(`update-details:`, deets);
 });
@@ -57,8 +65,8 @@ function handle_tilt_payload(payload: TiltPayload) {
   }
 }
 
-function on_device_beacon(bleacon: any) {
-  handle_tilt_payload(TiltPayload.fromBleacon(bleacon));
+function on_device_beacon(advertisement: any) {
+  handle_tilt_payload(TiltPayload.fromBeacon(advertisement));
 }
 
 function handle_tilt_post(req: any, res: any) {

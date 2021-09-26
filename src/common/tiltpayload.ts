@@ -69,6 +69,15 @@ class TiltPayload {
   static fromReq(req: any) {
     return new TiltPayload(req.uuid, req.temperature, req.gravity, req.rssi);
   }
+
+  static fromBeacon(beacon: any) {
+    return new TiltPayload(
+      beacon.iBeacon.uuid,
+      beacon.iBeacon.major,
+      beacon.iBeacon.minor / 1000.0,
+      beacon.txPower
+    );
+  }
 }
 
 export { TiltPayload, TiltColor };

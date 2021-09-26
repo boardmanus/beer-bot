@@ -1,11 +1,15 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { Utils } from '../common/utils';
-import * as config from '../config/config.json';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let Bleacon: any;
-if (!config.debug.fakeBleacon) {
-  Bleacon = require('bleacon');
-} else {
+try {
+  const noble = require('@abandonware/noble');
+  const BeaconScanner = require('node-beacon-scanner');
+  Bleacon = new BeaconScanner({ noble: noble });
+} catch (err: unknown) {
+  console.log(`node-beacon-scanner couldn't be started: using fake`);
+  console.error(`${err}`);
   const START_TEMPERATURE = 21.1;
   const START_GRAVITY = 1.1;
   const NOISE_TEMPERATURE = 2.0;
@@ -37,7 +41,7 @@ if (!config.debug.fakeBleacon) {
     major: number;
     minor: number;
     rssi: number;
-    callbacks: { [name: string]: BleaconCallback };
+    onadvertisement: (details: any) => void;
 
     constructor() {
       this.reading = new Reading();
@@ -45,27 +49,35 @@ if (!config.debug.fakeBleacon) {
       this.major = Utils.c_to_f(this.reading.temperature);
       this.minor = this.reading.gravity * 1000.0;
       this.rssi = 30;
-      this.callbacks = {};
     }
 
-    on(event: string, callback: BleaconCallback) {
-      this.callbacks[event] = callback;
-    }
+    startScan(): Promise<any> {
+      const promise = new Promise((resolve: any) => {
+        setInterval(() => {
+          this.reading.update(new Date().getTime());
+          this.minor =
+            1000.0 * (this.reading.gravity + Utils.noise(NOISE_GRAVITY));
+          this.major = Utils.c_to_f(
+            this.reading.temperature + Utils.noise(NOISE_TEMPERATURE)
+          );
 
-    startScanning() {
-      const discover = this.callbacks['discover'];
-      setInterval(() => {
-        this.reading.update(new Date().getTime());
-        this.minor =
-          1000.0 * (this.reading.gravity + Utils.noise(NOISE_GRAVITY));
-        this.major = Utils.c_to_f(
-          this.reading.temperature + Utils.noise(NOISE_TEMPERATURE)
-        );
+          const beaconRes = {
+            beaconType: 'iBeacon',
+            iBeacon: {
+              uuid: this.uuid,
+              major: this.major,
+              minor: this.minor,
+              txPower: this.rssi
+            }
+          };
+          if (this.onadvertisement) {
+            this.onadvertisement(beaconRes);
+          }
+        }, 1000);
+        resolve();
+      });
 
-        if (discover) {
-          discover(this);
-        }
-      }, 1000);
+      return promise;
     }
   }
 
