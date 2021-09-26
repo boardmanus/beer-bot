@@ -1,11 +1,10 @@
 import { Utils } from '../common/utils';
 import * as config from '../config/config.json';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let Bleacon: any;
 if (!config.debug.fakeBleacon) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const Bleacon_ = require('bleacon');
-  Bleacon = new Bleacon_();
+  Bleacon = require('bleacon');
 } else {
   const START_TEMPERATURE = 21.1;
   const START_GRAVITY = 1.1;
@@ -30,7 +29,7 @@ if (!config.debug.fakeBleacon) {
     }
   }
 
-  type BleaconCallback = (p: any) => void;
+  type BleaconCallback = (p: Bleacon_) => void;
 
   class Bleacon_ {
     reading: Reading;
