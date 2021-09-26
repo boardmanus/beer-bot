@@ -2,8 +2,7 @@ const Utils = require('./utils.js');
 const config = require('./config/config.json');
 
 if (!config.debug.fakebleacon) {
-    const Bleacon = require('bleacon');
-    module.exports = new Bleacon();
+    module.exports = require('bleacon');
 }
 else {
 
