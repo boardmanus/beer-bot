@@ -1,12 +1,34 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Utils } from '../common/utils';
+import { TiltPayload } from '../common/tiltpayload';
+
+interface IBeacon {
+  uuid: string;
+  major: number;
+  minor: number;
+  txPower: number;
+}
+
+interface Beacon {
+  beaconType: string;
+  iBeacon: IBeacon;
+}
+
+function toTiltPayload(beacon: Beacon): TiltPayload {
+  return new TiltPayload(
+    beacon.iBeacon.uuid,
+    beacon.iBeacon.major,
+    beacon.iBeacon.minor / 1000.0,
+    beacon.iBeacon.txPower
+  );
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Bleacon: any;
+let beaconScanner: any;
 try {
   const noble = require('@abandonware/noble');
   const BeaconScanner = require('node-beacon-scanner');
-  Bleacon = new BeaconScanner({ noble: noble });
+  beaconScanner = new BeaconScanner({ noble: noble });
 } catch (err: unknown) {
   console.log(`node-beacon-scanner couldn't be started: using fake`);
   console.error(`${err}`);
@@ -33,15 +55,13 @@ try {
     }
   }
 
-  type BleaconCallback = (p: Bleacon_) => void;
-
-  class Bleacon_ {
+  class FakeBeacon {
     reading: Reading;
     uuid: string;
     major: number;
     minor: number;
     rssi: number;
-    onadvertisement: (details: any) => void;
+    onadvertisement: (details: Beacon) => void;
 
     constructor() {
       this.reading = new Reading();
@@ -51,8 +71,8 @@ try {
       this.rssi = 30;
     }
 
-    startScan(): Promise<any> {
-      const promise = new Promise((resolve: any) => {
+    startScan(): Promise<unknown> {
+      const promise = new Promise((resolve: (value: void) => void) => {
         setInterval(() => {
           this.reading.update(new Date().getTime());
           this.minor =
@@ -61,7 +81,7 @@ try {
             this.reading.temperature + Utils.noise(NOISE_TEMPERATURE)
           );
 
-          const beaconRes = {
+          const beacon: Beacon = {
             beaconType: 'iBeacon',
             iBeacon: {
               uuid: this.uuid,
@@ -70,8 +90,9 @@ try {
               txPower: this.rssi
             }
           };
+
           if (this.onadvertisement) {
-            this.onadvertisement(beaconRes);
+            this.onadvertisement(beacon);
           }
         }, 1000);
         resolve();
@@ -81,6 +102,7 @@ try {
     }
   }
 
-  Bleacon = new Bleacon_();
+  beaconScanner = new FakeBeacon();
 }
-export default Bleacon;
+
+export { beaconScanner, toTiltPayload, Beacon };

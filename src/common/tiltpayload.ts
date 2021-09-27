@@ -56,28 +56,6 @@ class TiltPayload {
       this.gravity > 0.9
     );
   }
-
-  static fromBleacon(bleacon: any) {
-    return new TiltPayload(
-      bleacon.uuid,
-      bleacon.major,
-      bleacon.minor / 1000.0,
-      bleacon.rssi
-    );
-  }
-
-  static fromReq(req: any) {
-    return new TiltPayload(req.uuid, req.temperature, req.gravity, req.rssi);
-  }
-
-  static fromBeacon(beacon: any) {
-    return new TiltPayload(
-      beacon.iBeacon.uuid,
-      beacon.iBeacon.major,
-      beacon.iBeacon.minor / 1000.0,
-      beacon.txPower
-    );
-  }
 }
 
 export { TiltPayload, TiltColor };

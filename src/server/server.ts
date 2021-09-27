@@ -1,6 +1,6 @@
 import { Tilt } from './tilt';
 import { cloud } from './cloud';
-import bleacon from './bleacon-fake';
+import * as Beacon from './beacon';
 import * as config from '../config/config.json';
 import { TiltPayload } from '../common/tiltpayload';
 
@@ -16,9 +16,9 @@ const tilt = new Tilt();
 
 const PORT = 3000;
 
-bleacon.onadvertisement = on_device_beacon;
+Beacon.beaconScanner.onadvertisement = on_device_beacon;
 
-bleacon
+Beacon.beaconScanner
   .startScan()
   .then(() => {
     console.log('Started to scan.');
@@ -65,12 +65,14 @@ function handle_tilt_payload(payload: TiltPayload) {
   }
 }
 
-function on_device_beacon(advertisement: any) {
-  handle_tilt_payload(TiltPayload.fromBeacon(advertisement));
+function on_device_beacon(advertisement: Beacon.Beacon) {
+  handle_tilt_payload(Beacon.toTiltPayload(advertisement));
 }
 
 function handle_tilt_post(req: any, res: any) {
-  handle_tilt_payload(TiltPayload.fromReq(req));
+  handle_tilt_payload(
+    new TiltPayload(req.uuid, req.temperature, req.gravity, req.rssi)
+  );
   res.end('yes');
 }
 

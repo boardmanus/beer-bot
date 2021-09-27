@@ -3,9 +3,9 @@ import { Utils } from '../common/utils';
 import { TiltPayload } from '../common/tiltpayload';
 import * as request from 'request';
 
-const CLOUD_ENABLED = config.cloud.enabled;
-const CLOUD_URL = config.cloud.url;
-const CLOUD_REPORT_PERIOD_S = config.cloud.report_period_s;
+const CLOUD_ENABLED = config.cloud?.enabled ?? false;
+const CLOUD_URL = config.cloud?.url ?? '';
+const CLOUD_REPORT_PERIOD_S = config.cloud?.report_period_s ?? 300;
 
 function timestamp_to_googlesheettime(t: number) {
   return t / 86400000.0 + 25568.0;
@@ -13,7 +13,7 @@ function timestamp_to_googlesheettime(t: number) {
 
 function payloadToCloud(payload: TiltPayload) {
   const cloud = {
-    Beer: config.beer.name,
+    Beer: config.beer?.name ?? 'Beer',
     Temp: Utils.c_to_f(payload.ftemperature),
     SG: payload.fgravity,
     Color: payload.color,

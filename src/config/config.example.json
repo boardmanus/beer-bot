@@ -1,7 +1,4 @@
 {
-    "debug": {
-        "fakeBleacon": false
-    },
     "server": {
         "useHttps": false
     },
