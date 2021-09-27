@@ -20,6 +20,10 @@ const TILT_UUIDS: { [uuid: string]: TiltColor } = {
   a495bb70c5b14b44b5121370f02d74de: 'Pink'
 };
 
+function normalize_uuid(uuid: string): string {
+  return uuid.toLowerCase().replace(/-/g, '');
+}
+
 class TiltPayload {
   uuid: string;
   timestamp: number;
@@ -44,7 +48,7 @@ class TiltPayload {
     this.gravity = gravity;
     this.fgravity = this.gravity;
     this.rssi = rssi;
-    this.color = TILT_UUIDS[uuid];
+    this.color = TILT_UUIDS[normalize_uuid(uuid)];
   }
 
   isValid(): boolean {
