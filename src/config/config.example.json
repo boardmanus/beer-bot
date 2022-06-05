@@ -1,6 +1,7 @@
 {
     "server": {
-        "useHttps": false
+        "useHttps": false,
+        "LCDd": "localhost"
     },
     "cloud": {
         "enabled": false,

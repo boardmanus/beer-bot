@@ -68,4 +68,4 @@ class Cloud {
   }
 }
 
-export const cloud = new Cloud() as Cloud;
+export const cloud = new Cloud();

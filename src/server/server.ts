@@ -1,5 +1,6 @@
 import { Tilt } from './tilt';
 import { cloud } from './cloud';
+import { lcdproc } from './lcdproc';
 import * as Beacon from './beacon';
 import * as config from '../config/config.json';
 import { TiltPayload } from '../common/tiltpayload';
@@ -60,6 +61,7 @@ function handle_tilt_payload(payload: TiltPayload) {
     tilt.update(payload);
     io.emit('tilt-meas', JSON.stringify(tilt.payload));
     cloud.onPayload(tilt.payload);
+    lcdproc.onPayload(tilt.payload);
   } else {
     console.log('Invalid payload:', payload);
   }

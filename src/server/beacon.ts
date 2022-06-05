@@ -24,7 +24,7 @@ function toTiltPayload(beacon: Beacon): TiltPayload {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let beaconScanner: any;
+let beaconScanner;
 try {
   const noble = require('@abandonware/noble');
   const BeaconScanner = require('node-beacon-scanner');
