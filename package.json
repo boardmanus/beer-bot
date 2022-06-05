@@ -7,7 +7,7 @@
     "build:server": "tsc --build src/server",
     "build:client": "tsc --build src/client",
     "build:bro-dev": "browserify dist-client/client/client.js -p esmify -d -o dist-server/public/scripts/client.js",
-    "build:bro-pro": "browserify dist-client/client/client.js -p esmify -p tinyify -d -o dist-server/public/scripts/client.js",
+    "build:bro-pro": "browserify dist-client/client/client.js -p esmify -d -o dist-server/public/scripts/client.js",
     "build:clean": "rm -r dist-server dist-client",
     "build:copyassets": "cp -rf public dist-server/public",
     "build:dev": "npm-run-all build:server build:client build:copyassets build:bro-dev",

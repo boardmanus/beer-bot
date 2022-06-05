@@ -24,12 +24,14 @@ class LcdProc {
       const data_str = d.toString();
       const [cmd, ...params] = data_str.split(' ');
       if (cmd == 'connect') {
-        const pmap = params.reduce((acc: { [k: string]: string }, v, i, a) => {
-          if (i % 2) acc[a[i - 1]] = v;
-          return acc;
-        }, {});
-        this.width = parseInt(pmap['wid'] ?? '0');
-        this.height = parseInt(pmap['hgt'] ?? '0');
+        params.forEach((v, i, a) => {
+          if (v === 'wid') {
+            this.width = parseInt(a[i + 1]);
+          }
+          if (v === 'hgt') {
+            this.height = parseInt(a[i + 1]);
+          }
+        });
 
         this.socket.write('client_set name {beer-bot}\n');
         console.log(`LCDProc: width=${this.width}, height=${this.height}`);
