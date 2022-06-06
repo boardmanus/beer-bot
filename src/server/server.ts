@@ -1,6 +1,6 @@
 import { Tilt } from './tilt';
 import { cloud } from './cloud';
-import { lcdproc } from './lcdproc';
+import { LcdProc } from './lcdproc';
 import * as Beacon from './beacon';
 import * as config from '../config/config.json';
 import { TiltPayload } from '../common/tiltpayload';
@@ -13,9 +13,10 @@ import { Server } from 'socket.io';
 import express from 'express';
 const app = express();
 
-const tilt = new Tilt();
-
 const PORT = 3000;
+
+const tilt = new Tilt();
+const lcdproc = new LcdProc(config?.server?.LCDd ?? 'localhost');
 
 Beacon.beaconScanner.onadvertisement = on_device_beacon;
 
