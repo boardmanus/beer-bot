@@ -59,9 +59,6 @@ export class LcdProc {
   }
 
   private updateScreen(): void {
-    console.log(
-      `lcdproc: updating screen with t=${this.lastTemperature}, g=${this.lastGravity}`
-    );
     this.socket.write(this.temperatureVal(this.lastTemperature));
     this.socket.write(this.gravityVal(this.lastGravity));
     this.updateTimer.refresh();
