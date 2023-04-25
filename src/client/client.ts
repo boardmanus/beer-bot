@@ -1,5 +1,5 @@
-import { TiltPayload } from '../../common/tiltpayload';
-import { Utils } from '../../common/utils';
+import { TiltPayload } from '../common/tiltpayload';
+import { Utils } from '../common/utils';
 import $ from 'jquery';
 import io from 'socket.io-client';
 import { SVG, registerWindow } from '@svgdotjs/svg.js';
@@ -149,7 +149,7 @@ function update_fermenter_tilt(jist: Jist, meas: any) {
 function update_fermenter_svg(jist: Jist, contents: any) {
   const svgContents = $('svg', contents).html();
   jist.image.svg(svgContents);
-  jist.image.viewbox(0, 0, 80, 130);
+  //jist.image.viewbox(0, 0, 80, 130);
 
   jist.svgBeer = jist.image.find('#Beer');
   jist.svgBeerName = jist.image.find('#BeerName');
@@ -223,7 +223,7 @@ $(() => {
     svgLiquidPath: null,
     svgAnimation: null
   };
-  /*
+  
   $.get(
     '/images/fermenter.svg',
     (content) => {
@@ -231,7 +231,7 @@ $(() => {
     },
     'xml'
   );
-*/
+
   jist.beerName.on('keyup change', () => {
     update_beer_name(
       String(jist.beerName.val()),

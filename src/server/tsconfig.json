@@ -9,7 +9,7 @@
         "./node_modules/@types"
         ],
         "sourceMap": true,
-        "outDir": "dist",
+        "outDir": "dist-server",
         "strict": true,
         "lib": [
         "esnext"

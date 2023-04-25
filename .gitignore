@@ -5,3 +5,6 @@ src/config/*.pem
 package-lock.json
 dist-client/
 dist-server/
+dist/
+dist-pro/
+tsconfig.json

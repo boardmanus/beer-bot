@@ -2,7 +2,7 @@ doctype html
 html
     head
         title #{title}
-        link(rel='stylesheet', href='../../client/css/style.css')
+        link(rel='stylesheet', href='/css/style.css')
     body
         main
             header
@@ -25,5 +25,5 @@ html
                     #gravity -
                     #abv -
                 #fermenter
-                    object#svgimage(data='../../client/images/fermenter.svg')
-        script(type='module', src='../../client/scripts/client.ts')
+                    object#svgimage(data='/images/fermenter.svg')
+        script(type='module', src='/scripts/client.js')

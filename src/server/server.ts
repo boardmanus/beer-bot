@@ -80,10 +80,11 @@ function handle_tilt_post(req: any, res: any) {
 }
 
 app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/tilt', (req: any, res: any) => handle_tilt_post(req, res));
 app.get('/', (req: any, res: any) => {
