@@ -1,5 +1,5 @@
-import { TiltPayload } from '../common/tiltpayload';
-import { Utils } from '../common/utils';
+import { TiltPayload } from '../../common/tiltpayload';
+import { Utils } from '../../common/utils';
 import $ from 'jquery';
 import io from 'socket.io-client';
 import { SVG, registerWindow } from '@svgdotjs/svg.js';
@@ -8,8 +8,14 @@ registerWindow(window, document);
 
 const socket = io();
 
-const DEFAULT_BEER_DETAILS = {
-  name: 'Beer',
+type Deets = {
+  name: string;
+  color_srm: number;
+  og: number;
+};
+
+const DEFAULT_BEER_DETAILS: Deets = {
+  name: 'Beer pop',
   color_srm: 23.1,
   og: 1.01
 };
@@ -84,7 +90,7 @@ function update_beer_og(og: number, beerog: any) {
   validate_data(og, is_valid_beer_og, beerog);
 }
 
-function update_beer_details(jist: Jist, deets: any) {
+function update_beer_details(jist: Jist, deets: Deets) {
   console.log('update-beer-details: ', deets);
   update_beer_name(deets.name, jist.beerName, jist.svgBeerName);
   update_beer_color(deets.color_srm, jist.beerColor, jist.svgBeer);
@@ -159,16 +165,24 @@ function update_fermenter_svg(jist: Jist, contents: any) {
 }
 
 function submit_beer_details(jist: Jist) {
-  const beerName = jist.beerName.val();
-  const beerColorSrm = jist.beerColor.val();
-  const beerOg = jist.beerOg.val();
+  const deets: Deets = {
+    name: jist.beerName.val(),
+    color_srm: jist.beerColor.val(),
+    og: jist.beerOg.val()
+  };
 
-  update_beer_name(beerName, jist.beerName, jist.svgBeerName);
-  update_beer_color(beerColorSrm, jist.beerColor, jist.svgBeer);
-  update_beer_og(beerOg, jist.beerOg);
-  update_beer_abv(beerOg, lastTiltMeas.gravity, jist.beerAbv, jist.svgBeerAbv);
+  update_beer_name(deets.name, jist.beerName, jist.svgBeerName);
+  update_beer_color(deets.color_srm, jist.beerColor, jist.svgBeer);
+  update_beer_og(deets.og, jist.beerOg);
+  update_beer_abv(
+    deets.og,
+    lastTiltMeas.gravity,
+    jist.beerAbv,
+    jist.svgBeerAbv
+  );
 
-  //socket.emit('update-details', JSON.stringify({ deets }));
+  const jsonStr = JSON.stringify(deets);
+  socket.emit('update-details', jsonStr);
 }
 
 type Jist = {
@@ -209,7 +223,7 @@ $(() => {
     svgLiquidPath: null,
     svgAnimation: null
   };
-
+  /*
   $.get(
     '/images/fermenter.svg',
     (content) => {
@@ -217,7 +231,7 @@ $(() => {
     },
     'xml'
   );
-
+*/
   jist.beerName.on('keyup change', () => {
     update_beer_name(
       String(jist.beerName.val()),
