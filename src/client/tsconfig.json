@@ -15,7 +15,7 @@
         }
     },
     "include": [
-        "./*.ts",
-        "../../common/*.ts"
+        "./scripts/*.ts",
+        "../common/*.ts"
     ]
 }
