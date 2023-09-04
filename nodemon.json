@@ -1,5 +1,5 @@
 {
-  "watch": ["src/server", "src/client"],
+  "watch": ["src/server", "src/client", "config"],
   "ignore": ["node_modules"],
   "ext": "ts,mjs,js,json,graphql",
   "exec": "etsc && node ./dist/server.js",

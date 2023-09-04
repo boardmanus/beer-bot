@@ -2,8 +2,8 @@ import { Tilt } from './tilt';
 import { cloud } from './cloud';
 import { LcdProc } from './lcdproc';
 import * as Beacon from './beacon';
-import * as config from '../config/config.json';
-import { TiltPayload } from '../common/tiltpayload';
+import * as config from 'config/config.json';
+import { TiltPayload } from 'common/tiltpayload';
 
 import * as fs from 'fs';
 import path from 'path';

@@ -8,3 +8,4 @@ dist-server/
 dist/
 dist-pro/
 tsconfig.json
+*-metafile.json

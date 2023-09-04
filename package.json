@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "clean": "rm -rf dist dist-pro",
-    "copyassets:dev": "mkdir -p dist; cp -rf src/public src/views dist/; ln -s src/server/tsconfig.json tsconfig.json",
+    "copyassets:dev": "mkdir -p dist; cp -rf src/public src/views dist/; ln -fs src/server/tsconfig.json tsconfig.json",
     "copyassets:pro": "mkdir -p dist-pro; cp -rf src/public src/views dist-pro/",
     "build:dev": "npm-run-all copyassets:dev build:server:dev build:client:dev",
     "build:pro": "npm-run-all copyassets:pro build:server:pro build:client:pro",
@@ -15,8 +15,8 @@
     "start:pro": "npm-run-all build:pro run:pro",
     "build:client:dev": "esbuild src/client/client.ts --sourcemap --platform=browser --bundle --outfile=dist/public/scripts/client.js",
     "build:server:dev": "esbuild src/server/server.ts --sourcemap --platform=node --bundle --outfile=dist/server.js",
-    "build:client:pro": "esbuild src/client/client.ts --platform=browser --bundle --minify --outfile=dist-pro/public/scripts/client.js",
-    "build:server:pro": "esbuild src/server/server.ts --platform=node --bundle --minify --outfile=dist-pro/server.js"
+    "build:client:pro": "esbuild src/client/client.ts --metafile=client-metafile.json --platform=browser --bundle --minify --outfile=dist-pro/public/scripts/client.js",
+    "build:server:pro": "esbuild src/server/server.ts --metafile=server-metafile.json --platform=node --bundle --minify --outfile=dist-pro/server.js"
   },
   "keywords": [
     "tilt",
@@ -25,33 +25,32 @@
   "author": "Craig Boardman",
   "license": "ISC",
   "dependencies": {
-    "@abandonware/noble": "^1.9.2-21",
-    "@svgdotjs/svg.js": "^3.1.2",
-    "body-parser": "^1.20.2",
+    "@abandonware/noble": "^1.9.2-23",
+    "@svgdotjs/svg.js": "^3.2.0",
     "express": "^4.18.2",
-    "jquery": "^3.6.4",
+    "jquery": "^3.7.1",
     "node-beacon-scanner": "^0.2.2",
     "pug": "^3.0.2",
     "request": "^2.88.2",
-    "socket.io": "^4.6.1",
-    "socket.io-client": "^4.6.1"
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2"
   },
   "devDependencies": {
-    "@parcel/transformer-pug": "^2.8.3",
+    "@parcel/transformer-pug": "^2.9.3",
     "@types/express": "^4.17.17",
-    "@types/jquery": "^3.5.16",
-    "@types/node": "^18.16.0",
+    "@types/jquery": "^3.5.18",
+    "@types/node": "^20.5.9",
     "@types/request": "^2.48.8",
-    "@typescript-eslint/eslint-plugin": "^5.59.1",
-    "@typescript-eslint/parser": "^5.59.1",
-    "esbuild": "^0.17.18",
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
+    "@typescript-eslint/parser": "^6.5.0",
+    "esbuild": "^0.19.2",
     "esbuild-node-tsc": "^2.0.5",
-    "esbuild-plugin-pug": "*",
-    "eslint": "^8.39.0",
+    "esbuild-plugin-pug": "^0.0.8",
+    "eslint": "^8.48.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "nodemon": "^2.0.22",
+    "nodemon": "^3.0.1",
     "npm-run-all": "^4.1.5",
-    "typescript": "^5.0.4"
+    "typescript": "^5.2.2"
   }
 }
