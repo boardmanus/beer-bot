@@ -27,7 +27,7 @@
   "dependencies": {
     "@abandonware/noble": "^1.9.2-25",
     "@svgdotjs/svg.js": "^3.2.0",
-    "express":"4.19.2",
+    "express":"^4.19.2",
     "jquery": "^3.7.1",
     "needle": "^3.2.0",
     "node-beacon-scanner": "^0.2.2",
