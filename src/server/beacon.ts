@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Utils } from '../common/utils';
-import { TiltPayload } from '../common/tiltpayload';
+import { TiltPayload } from 'common/tiltpayload';
+//import * as config from 'config/config.json';
 
 interface IBeacon {
   uuid: string;
@@ -9,12 +10,12 @@ interface IBeacon {
   txPower: number;
 }
 
-interface Beacon {
+interface IBeaconReading {
   beaconType: string;
   iBeacon: IBeacon;
 }
 
-function toTiltPayload(beacon: Beacon): TiltPayload {
+function toTiltPayload(beacon: IBeaconReading): TiltPayload {
   return new TiltPayload(
     beacon.iBeacon.uuid,
     beacon.iBeacon.major,
@@ -23,15 +24,26 @@ function toTiltPayload(beacon: Beacon): TiltPayload {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-//let beaconScanner;
-//try {
-//  const noble = require('@abandonware/noble');
-//  const BeaconScanner = require('node-beacon-scanner');
-//  beaconScanner = new BeaconScanner({ noble: noble });
-//} catch (err: unknown) {
-console.log(`node-beacon-scanner couldn't be started: using fake`);
-//  console.error(`${err}`);
+function create_beacon_scanner(): FakeBeacon /*|BeaconScanner*/ {
+  //  if (config?.debug?.fakebleacon ?? false) {
+  return new FakeBeacon();
+  /*
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let beaconScanner;
+    const noble = require('@abandonware/noble');
+    try {
+      const BeaconScanner = require('node-beacon-scanner');
+      beaconScanner = new BeaconScanner({ noble: noble });
+    } catch (err: unknown) {
+      console.log(`node-beacon-scanner couldn't be started: using fake (${err})`);
+      beaconScanner = new FakeBeacon();
+    }
+    return beaconScanner;
+  }
+  */
+}
+
 const START_TEMPERATURE = 21.1;
 const START_GRAVITY = 1.1;
 const NOISE_TEMPERATURE = 2.0;
@@ -61,7 +73,7 @@ class FakeBeacon {
   major: number;
   minor: number;
   rssi: number;
-  onadvertisement: (details: Beacon) => void;
+  onadvertisement: (details: IBeaconReading) => void;
 
   constructor() {
     this.reading = new Reading();
@@ -69,6 +81,9 @@ class FakeBeacon {
     this.major = Utils.c_to_f(this.reading.temperature);
     this.minor = this.reading.gravity * 1000.0;
     this.rssi = 30;
+    this.onadvertisement = (_reading: IBeaconReading) => {
+      _reading;
+    };
   }
 
   startScan(): Promise<unknown> {
@@ -81,7 +96,7 @@ class FakeBeacon {
           this.reading.temperature + Utils.noise(NOISE_TEMPERATURE)
         );
 
-        const beacon: Beacon = {
+        const beacon: IBeaconReading = {
           beaconType: 'iBeacon',
           iBeacon: {
             uuid: this.uuid,
@@ -102,7 +117,23 @@ class FakeBeacon {
   }
 }
 
-const beaconScanner = new FakeBeacon();
-//}
+class Beacon {
+  beaconScanner: FakeBeacon /*|BeaconScanner*/;
 
-export { beaconScanner, toTiltPayload, Beacon };
+  constructor(onadvertisement: (details: TiltPayload) => void) {
+    this.beaconScanner = create_beacon_scanner();
+    this.beaconScanner.onadvertisement = (details: IBeaconReading) => {
+      onadvertisement(toTiltPayload(details));
+    };
+    this.beaconScanner
+      .startScan()
+      .then(() => {
+        console.log('Started to scan.');
+      })
+      .catch((error: unknown) => {
+        console.error(error);
+      });
+  }
+}
+
+export { Beacon };

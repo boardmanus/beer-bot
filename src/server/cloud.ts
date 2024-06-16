@@ -1,7 +1,8 @@
 import * as config from 'config/config.json';
 import { Utils } from 'common/utils';
 import { TiltPayload } from 'common/tiltpayload';
-import * as request from 'request';
+import * as request from 'needle';
+//import * as request from 'request';
 
 const CLOUD_ENABLED = config.cloud?.enabled ?? false;
 const CLOUD_URL = config.cloud?.url ?? '';
@@ -27,7 +28,6 @@ function payloadToCloud(payload: TiltPayload) {
     Comment: '',
     Timepoint: timestamp_to_googlesheettime(payload.timestamp)
   };
-
   return cloud;
 }
 
@@ -58,9 +58,9 @@ class Cloud {
 
       request.post(
         CLOUD_URL,
+        cloudData,
         {
-          qs: cloudData,
-          followAllRedirects: true
+          follow_max: 5
         },
         (error, res, body) => {
           if (error) {
@@ -75,4 +75,4 @@ class Cloud {
   }
 }
 
-export const cloud = new Cloud();
+export { Cloud };
