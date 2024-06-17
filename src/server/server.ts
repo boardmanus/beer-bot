@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import path from 'path';
 import * as https from 'https';
 import * as http from 'http';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import express, { Express, Request, Response } from 'express';
 
 const PORT = 3000;
@@ -72,14 +72,14 @@ const cloud = new Cloud();
 const app: Express = express();
 const io = create_io_server(app);
 
-io.on('connection', () => {
+io.on('connection', (socket: Socket) => {
   console.log('Client connected!', config.beer);
-  io.emit('beer-details', JSON.stringify(config.beer));
-});
+  socket.emit('beer-details', JSON.stringify(config.beer));
 
-io.on('update-details', (msg: string) => {
-  const deets = JSON.parse(msg);
-  console.log(`update-details:`, deets);
+  socket.on('update-details', (msg: string) => {
+    const deets = JSON.parse(msg);
+    console.log(`update-details:`, deets);
+  });
 });
 
 app.set('view engine', 'pug');
