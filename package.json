@@ -9,7 +9,7 @@
     "copyassets:pro": "mkdir -p dist-pro; cp -rf src/public src/views dist-pro/",
     "build:dev": "npm-run-all copyassets:dev build:server:dev build:client:dev",
     "build:pro": "npm-run-all copyassets:pro build:server:pro build:client:pro",
-    "run:dev": "nodemon",
+    "run:dev": "nodemon dist/server.js",
     "run:pro": "node dist-pro/server.js",
     "start:dev": "npm-run-all build:dev run:dev",
     "start:pro": "npm-run-all build:pro run:pro",
