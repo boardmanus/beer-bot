@@ -1,11 +1,9 @@
 node_modules
-.vscode/
 src/config/config.json
 src/config/*.pem
 package-lock.json
-dist-client/
-dist-server/
-dist/
+yarn.lock
+dist-dev/
 dist-pro/
 tsconfig.json
 *-metafile.json
