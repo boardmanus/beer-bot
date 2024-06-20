@@ -1,7 +1,0 @@
-{
-  "watch": ["src/server", "src/client", "config"],
-  "ignore": ["node_modules"],
-  "ext": "ts,mjs,js,json,graphql",
-  "exec": "npm run build:dev && node ./dist/server.js",
-  "legacyWatch": true
-}

@@ -1,6 +1,6 @@
 import { Utils } from '../common/utils';
 import { TiltPayload } from '../common/tiltpayload';
-import { Beacon } from 'beacon';
+import { Beacon } from './beacon';
 
 const TEMPERATURE_RC = 60.0;
 const GRAVITY_RC = 60.0;

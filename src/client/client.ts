@@ -149,7 +149,7 @@ function update_fermenter_tilt(jist: Jist, meas: any) {
 function update_fermenter_svg(jist: Jist, contents: any) {
   const svgContents = $('svg', contents).html();
   jist.image.svg(svgContents);
-  //jist.image.viewbox(0, 0, 80, 130);
+  jist.image.viewbox(0, 0, 80, 130);
 
   jist.svgBeer = jist.image.find('#Beer');
   jist.svgBeerName = jist.image.find('#BeerName');

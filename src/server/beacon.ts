@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Utils } from '../common/utils';
-import { TiltPayload } from 'common/tiltpayload';
-//import * as config from 'config/config.json';
+import { TiltPayload } from '../common/tiltpayload';
+import * as config from '../config/config.json';
 
 interface IBeacon {
   uuid: string;
@@ -15,6 +15,23 @@ interface IBeaconReading {
   iBeacon: IBeacon;
 }
 
+interface BeaconScanner {
+  onadvertisement: (details: IBeaconReading) => void;
+  startScan(): Promise<unknown>;
+}
+
+// BeaconScanner may not be available on some platforms (windows).
+// Allow the require to fail. If it does fail, it is replaced by
+// FakeBeacon.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let NodeBeaconScanner: any;
+try {
+  NodeBeaconScanner = require('node-beacon-scanner');
+} catch (err: unknown) {
+  console.log(`node-beacon-scanner couldn't be started: using fake (${err})`);
+  NodeBeaconScanner = null;
+}
+
 function toTiltPayload(beacon: IBeaconReading): TiltPayload {
   return new TiltPayload(
     beacon.iBeacon.uuid,
@@ -24,24 +41,13 @@ function toTiltPayload(beacon: IBeaconReading): TiltPayload {
   );
 }
 
-function create_beacon_scanner(): FakeBeacon /*|BeaconScanner*/ {
-  //  if (config?.debug?.fakebleacon ?? false) {
-  return new FakeBeacon();
-  /*
+function create_beacon_scanner(): BeaconScanner {
+  if ((NodeBeaconScanner == null || config?.debug?.fakebleacon) ?? false) {
+    return new FakeBeacon();
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let beaconScanner;
     const noble = require('@abandonware/noble');
-    try {
-      const BeaconScanner = require('node-beacon-scanner');
-      beaconScanner = new BeaconScanner({ noble: noble });
-    } catch (err: unknown) {
-      console.log(`node-beacon-scanner couldn't be started: using fake (${err})`);
-      beaconScanner = new FakeBeacon();
-    }
-    return beaconScanner;
+    return new NodeBeaconScanner({ noble: noble });
   }
-  */
 }
 
 const START_TEMPERATURE = 21.1;
@@ -67,7 +73,7 @@ class Reading {
   }
 }
 
-class FakeBeacon {
+class FakeBeacon implements BeaconScanner {
   reading: Reading;
   uuid: string;
   major: number;
@@ -118,7 +124,7 @@ class FakeBeacon {
 }
 
 class Beacon {
-  beaconScanner: FakeBeacon /*|BeaconScanner*/;
+  beaconScanner: BeaconScanner;
 
   constructor(onadvertisement: (details: TiltPayload) => void) {
     this.beaconScanner = create_beacon_scanner();

@@ -1,6 +1,6 @@
-import * as config from 'config/config.json';
-import { Utils } from 'common/utils';
-import { TiltPayload } from 'common/tiltpayload';
+import * as config from '../config/config.json';
+import { Utils } from '../common/utils';
+import { TiltPayload } from '../common/tiltpayload';
 import * as request from 'needle';
 //import * as request from 'request';
 

@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "clean": "rm -rf dist dist-pro",
-    "copyassets:dev": "mkdir -p dist; cp -rf src/public src/views dist/; ln -fs src/server/tsconfig.json tsconfig.json",
+    "copyassets:dev": "mkdir -p dist-dev; cp -rf src/public src/views dist-dev/",
     "copyassets:pro": "mkdir -p dist-pro; cp -rf src/public src/views dist-pro/",
     "build:dev": "npm-run-all copyassets:dev build:server:dev build:client:dev",
     "build:pro": "npm-run-all copyassets:pro build:server:pro build:client:pro",
@@ -13,10 +13,17 @@
     "run:pro": "node dist-pro/server.js",
     "start:dev": "npm-run-all build:dev run:dev",
     "start:pro": "npm-run-all build:pro run:pro",
-    "build:client:dev": "esbuild src/client/client.ts --sourcemap --platform=browser --bundle --outfile=dist/public/scripts/client.js",
-    "build:server:dev": "esbuild src/server/server.ts --sourcemap --platform=node --bundle --outfile=dist/server.js",
-    "build:client:pro": "esbuild src/client/client.ts --metafile=client-metafile.json --platform=browser --bundle --minify --outfile=dist-pro/public/scripts/client.js",
-    "build:server:pro": "esbuild src/server/server.ts --metafile=server-metafile.json --platform=node --bundle --minify --outfile=dist-pro/server.js"
+    "build:client:dev": "esbuild src/client/client.ts --sourcemap --platform=browser --bundle --outfile=dist-dev/public/scripts/client.js",
+    "build:server:dev": "esbuild src/server/server.ts --sourcemap --platform=node --bundle --outfile=dist-dev/server.js --external:noble --loader:.node=file",
+    "build:client:pro": "esbuild src/client/client.ts --sourcemap --platform=browser --bundle --minify --outfile=dist-pro/public/scripts/client.js --metafile=client-metafile.json ",
+    "build:server:pro": "esbuild src/server/server.ts --sourcemap --platform=node --bundle --minify --outfile=dist-pro/server.js --external:noble --loader:.node=file --metafile=server-metafile.json"
+  },
+  "nodemonConfig": {
+    "watch": ["src","package.json"],
+    "ignore": ["node_modules"],
+    "ext": "ts,js,json,pug",
+    "exec": "npm run build:dev && node ./dist-dev/server.js",
+    "legacyWatch": true
   },
   "keywords": [
     "tilt",
@@ -27,7 +34,7 @@
   "dependencies": {
     "@abandonware/noble": "^1.9.2-25",
     "@svgdotjs/svg.js": "^3.2.0",
-    "express":"^4.19.2",
+    "express": "^4.19.2",
     "jquery": "^3.7.1",
     "needle": "^3.2.0",
     "node-beacon-scanner": "^0.2.2",
@@ -38,11 +45,10 @@
   "devDependencies": {
     "@eslint/object-schema": "^2.1.4",
     "@eslint/config-array": "^0.16.0",
-    "@parcel/transformer-pug": "^2.12.0",
     "@types/express": "^4.17.21",
     "@types/jquery": "^3.5.30",
     "@types/node": "^20.5.9",
-    "@types/needle": "^3.2.0",
+    "@types/needle": "^3.3.0",
     "@typescript-eslint/eslint-plugin": "^7.13.0",
     "@typescript-eslint/parser": "^7.13.0",
     "esbuild": "^0.21.5",

@@ -1,8 +1,8 @@
 import { Tilt } from './tilt';
 import { Cloud } from './cloud';
 import { LcdProc } from './lcdproc';
-import * as config from 'config/config.json';
-import { TiltPayload } from 'common/tiltpayload';
+import * as config from '../config/config.json';
+import { TiltPayload } from '../common/tiltpayload';
 
 import * as fs from 'fs';
 import path from 'path';
