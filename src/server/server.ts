@@ -1,18 +1,20 @@
 import { Tilt } from './tilt';
 import { Cloud } from './cloud';
 import { LcdProc } from './lcdproc';
-import * as config from '../config/config.json';
+import * as beerbot_config from '../config/config.json';
 import { TiltPayload } from '../common/tiltpayload';
 
 import * as fs from 'fs';
 import path from 'path';
 import * as https from 'https';
 import * as http from 'http';
+import { Config, Beer } from 'config';
 import { Server, Socket } from 'socket.io';
 import express, { Express, Request, Response } from 'express';
 
 const PORT = 3000;
-const LCDd_ADDRESS = config?.server?.LCDd ?? 'localhost';
+const BEER_CONFIG_PATH = './config/beer_config.json';
+const LCDd_ADDRESS = beerbot_config?.server?.LCDd ?? 'localhost';
 
 type TiltRequest = Request<{
   uuid: string;
@@ -23,7 +25,7 @@ type TiltRequest = Request<{
 
 function create_io_server(app: Express): Server {
   let server: https.Server | http.Server;
-  if (config?.server?.useHttps) {
+  if (beerbot_config?.server?.useHttps) {
     const httpsOpts = {
       key: fs.readFileSync('./config/key.pem'),
       cert: fs.readFileSync('./config/cert.pem')
@@ -65,20 +67,24 @@ function handle_get_root(_req: Request, res: Response) {
   res.render('index', { title: 'beer-bot' });
 }
 
+function handle_beer_change(beer: Beer) {
+  io.emit('beer-details', JSON.stringify(beer));
+}
+
 const _tilt = new Tilt(handle_tilt_payload);
 const lcdproc = new LcdProc(LCDd_ADDRESS);
 const cloud = new Cloud();
+const config = new Config(BEER_CONFIG_PATH);
 
 const app: Express = express();
 const io = create_io_server(app);
 
 io.on('connection', (socket: Socket) => {
-  console.log('Client connected!', config.beer);
-  socket.emit('beer-details', JSON.stringify(config.beer));
-
-  socket.on('update-details', (msg: string) => {
-    const deets = JSON.parse(msg);
-    console.log(`update-details:`, deets);
+  console.log('Client connected!');
+  config.registerOnChange(handle_beer_change);
+  socket.on('update-details', (beerJson: string) => {
+    const beer = config.update(beerJson);
+    console.log(`update-details:`, beer);
   });
 });
 

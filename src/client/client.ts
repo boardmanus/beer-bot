@@ -223,7 +223,7 @@ $(() => {
     svgLiquidPath: null,
     svgAnimation: null
   };
-  
+
   $.get(
     '/images/fermenter.svg',
     (content) => {

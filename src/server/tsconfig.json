@@ -1,21 +1,18 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "esModuleInterop": true,
-        "target": "es6",
-        "noImplicitAny": true,
-        "moduleResolution": "node",
-        "resolveJsonModule": true,
-        "sourceMap": true,
-        "outDir": "../../dist-server",
-        "baseUrl": ".",
-        "paths": {
-            "config/*": ["../config/*"],
-            "common/*": ["../common/*"]
-        }
-    },
-    "include": [
-        "./*.ts",
-        "../common/*.ts"
-    ]
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "es6",
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "outDir": "../../dist-server",
+    "baseUrl": ".",
+    "paths": {
+      "config/*": ["../config/*"],
+      "common/*": ["../common/*"]
+    }
+  },
+  "include": ["./*.ts", "../common/*.ts"]
 }
