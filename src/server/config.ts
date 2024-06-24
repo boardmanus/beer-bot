@@ -2,12 +2,14 @@
 // under brew details.
 import * as fs from 'fs';
 
+// A Beer configuration.
 export interface Beer {
   name?: string;
   color_srm?: number;
   og?: number;
 }
 
+// Merge any missing data in the new beer from the original beer.
 function merge_beer(beer: Beer, orig: Beer): Beer {
   return {
     name: beer.name ?? orig.name,
@@ -35,9 +37,9 @@ export type OnBeerChange = (beer: Beer) => void;
 // Configuration utility for reading and writing the Beer under brew details.
 export class Config {
   readonly DEFAULT_BEER: Beer = {
-    name: 'Mega Stout',
-    color_srm: 37.0,
-    og: 1.06
+    name: 'Plain Beer',
+    color_srm: 23.0,
+    og: 1.047
   };
 
   private path: string;

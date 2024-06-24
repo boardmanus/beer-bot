@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "clean": "rm -rf dist dist-pro",
-    "copyassets:dev": "mkdir -p dist-dev; cp -rf src/public src/views dist-dev/",
-    "copyassets:pro": "mkdir -p dist-pro; cp -rf src/public src/views dist-pro/",
+    "copyassets:dev": "mkdir -p dist-dev/config && cp -rf src/public src/views dist-dev/",
+    "copyassets:pro": "mkdir -p dist-pro/config && cp -rf src/public src/views dist-pro/",
     "build:dev": "npm-run-all copyassets:dev build:server:dev build:client:dev",
     "build:pro": "npm-run-all copyassets:pro build:server:pro build:client:pro",
     "run:dev": "nodemon dist/server.js",

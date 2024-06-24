@@ -13,7 +13,7 @@ import { Server, Socket } from 'socket.io';
 import express, { Express, Request, Response } from 'express';
 
 const PORT = 3000;
-const BEER_CONFIG_PATH = './config/beer_config.json';
+const BEER_CONFIG_PATH = path.join(__dirname, 'config/beer_config.json');
 const LCDd_ADDRESS = beerbot_config?.server?.LCDd ?? 'localhost';
 
 type TiltRequest = Request<{
@@ -69,12 +69,13 @@ function handle_get_root(_req: Request, res: Response) {
 
 function handle_beer_change(beer: Beer) {
   io.emit('beer-details', JSON.stringify(beer));
+  cloud.onBeerChange(beer);
 }
 
 const _tilt = new Tilt(handle_tilt_payload);
 const lcdproc = new LcdProc(LCDd_ADDRESS);
-const cloud = new Cloud();
 const config = new Config(BEER_CONFIG_PATH);
+const cloud = new Cloud(config);
 
 const app: Express = express();
 const io = create_io_server(app);
