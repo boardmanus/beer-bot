@@ -3,7 +3,6 @@ import { Config, Beer } from './config';
 import { Utils } from '../common/utils';
 import { TiltPayload } from '../common/tiltpayload';
 import * as request from 'needle';
-//import * as request from 'request';
 
 const CLOUD_ENABLED = beerbot_config.cloud?.enabled ?? false;
 const CLOUD_URL = beerbot_config.cloud?.url ?? '';
