@@ -1,5 +1,5 @@
 {
   "transform": {
-    "^.+\\.tsx?$": "esbuild-jest"
+    "^.+\\.tsx?$": "es-jest"
   }
 }

@@ -1,50 +1,30 @@
-import { Utils } from '../common/utils';
 import { TiltPayload } from '../common/tiltpayload';
-import { Beacon } from './beacon';
-
-const TEMPERATURE_RC = 60.0;
-const GRAVITY_RC = 60.0;
+import { LowPassFilter } from '../common/low_pass_filter';
+import * as config from '../config/config.json';
 
 type OnTiltPayload = (payload: TiltPayload) => void;
 
+const TEMPERATURE_RC = (config?.cloud?.report_period_s ?? 120.0) / 2.0;
+const GRAVITY_RC = TEMPERATURE_RC;
+
 class Tilt {
-  private lastPayload: TiltPayload | null;
+  private tFilter = new LowPassFilter(TEMPERATURE_RC);
+  private gFilter = new LowPassFilter(GRAVITY_RC);
   private onTiltPayload: OnTiltPayload;
-  private _tiltBeacon: Beacon;
 
   constructor(onTiltPayload: OnTiltPayload) {
+    this.tFilter = new LowPassFilter(TEMPERATURE_RC);
     this.onTiltPayload = onTiltPayload;
-    this._tiltBeacon = new Beacon((payload: TiltPayload) => {
-      this.handleTiltPayload(payload);
-    });
-    this.lastPayload = null;
   }
 
-  uploadTiltPayload(payload: TiltPayload) {
-    if (payload.isValid() && this.lastPayload != null) {
-      const dt = (payload.timestamp - this.lastPayload.timestamp) / 1000.0;
-
-      payload.ftemperature = Utils.low_pass_filter(
-        payload.temperature,
-        this.lastPayload.ftemperature,
-        dt,
-        TEMPERATURE_RC
-      );
-
-      payload.fgravity = Utils.low_pass_filter(
-        payload.gravity,
-        this.lastPayload.fgravity,
-        dt,
-        GRAVITY_RC
-      );
-    }
-    return payload;
-  }
-
-  private handleTiltPayload(payload: TiltPayload) {
-    payload = this.uploadTiltPayload(payload);
+  handleTiltPayload(payload: TiltPayload) {
     if (payload.isValid()) {
-      this.lastPayload = payload;
+      payload.temperature = this.tFilter.update(
+        payload.temperature,
+        payload.timestamp
+      );
+      payload.gravity = this.gFilter.update(payload.gravity, payload.timestamp);
+
       this.onTiltPayload(payload);
     }
   }

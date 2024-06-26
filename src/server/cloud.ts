@@ -6,14 +6,7 @@ import * as request from 'needle';
 
 const CLOUD_ENABLED = beerbot_config.cloud?.enabled ?? false;
 const CLOUD_URL = beerbot_config.cloud?.url ?? '';
-const CLOUD_REPORT_PERIOD_S = cloud_report_period_s();
-
-function cloud_report_period_s() {
-  if (beerbot_config.cloud?.report_period_s) {
-    return parseInt(beerbot_config.cloud.report_period_s);
-  }
-  return 300;
-}
+const CLOUD_REPORT_PERIOD_S = beerbot_config?.cloud?.report_period_s ?? 300.0;
 
 function timestamp_to_googlesheettime(t: number) {
   return t / 86400000.0 + 25568.0;
@@ -22,8 +15,8 @@ function timestamp_to_googlesheettime(t: number) {
 function payloadToCloud(beer: string, payload: TiltPayload) {
   const cloud = {
     Beer: beer,
-    Temp: Utils.c_to_f(payload.ftemperature),
-    SG: payload.fgravity,
+    Temp: Utils.c_to_f(payload.temperature),
+    SG: payload.gravity,
     Color: payload.color,
     Comment: '',
     Timepoint: timestamp_to_googlesheettime(payload.timestamp)

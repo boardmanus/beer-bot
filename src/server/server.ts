@@ -1,5 +1,6 @@
 import { Tilt } from './tilt';
 import { Cloud } from './cloud';
+import { Beacon } from './beacon';
 import { LcdProc } from './lcdproc';
 import * as beerbot_config from '../config/config.json';
 import { TiltPayload } from '../common/tiltpayload';
@@ -72,7 +73,8 @@ function handle_beer_change(beer: Beer) {
   cloud.onBeerChange(beer);
 }
 
-const _tilt = new Tilt(handle_tilt_payload);
+const tilt = new Tilt(handle_tilt_payload);
+const _beacon = new Beacon((payload) => tilt.handleTiltPayload(payload));
 const lcdproc = new LcdProc(LCDd_ADDRESS);
 const config = new Config(BEER_CONFIG_PATH);
 const cloud = new Cloud(config);

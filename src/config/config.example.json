@@ -1,17 +1,16 @@
 {
-    "server": {
-        "useHttps": false,
-        "LCDd": "localhost"
-    },
-    "cloud": {
-        "enabled": false,
-        "url": "http://url.to.my.cloud/",
-        "report_period_s": "300"
-    },
-    "beer": {
-        "name": "Mega Stout",
-        "color_srm": 37.0,
-        "og": 1.060
-    }
+  "server": {
+    "useHttps": false,
+    "LCDd": "localhost"
+  },
+  "cloud": {
+    "enabled": false,
+    "url": "http://url.to.my.cloud/",
+    "report_period_s": 300
+  },
+  "beer": {
+    "name": "Mega Stout",
+    "color_srm": 37.0,
+    "og": 1.06
+  }
 }
-

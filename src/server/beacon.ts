@@ -18,6 +18,7 @@ interface IBeaconReading {
 interface BeaconScanner {
   onadvertisement: (details: IBeaconReading) => void;
   startScan(): Promise<unknown>;
+  stopScan(): void;
 }
 
 // BeaconScanner may not be available on some platforms (windows).
@@ -80,6 +81,7 @@ class FakeBeacon implements BeaconScanner {
   minor: number;
   rssi: number;
   onadvertisement: (details: IBeaconReading) => void;
+  timer: NodeJS.Timeout;
 
   constructor() {
     this.reading = new Reading();
@@ -94,7 +96,7 @@ class FakeBeacon implements BeaconScanner {
 
   startScan(): Promise<unknown> {
     const promise = new Promise((resolve: (value: void) => void) => {
-      setInterval(() => {
+      this.timer = setInterval(() => {
         this.reading.update(new Date().getTime());
         this.minor =
           1000.0 * (this.reading.gravity + Utils.noise(NOISE_GRAVITY));
@@ -121,16 +123,20 @@ class FakeBeacon implements BeaconScanner {
 
     return promise;
   }
+
+  stopScan() {
+    clearInterval(this.timer);
+  }
 }
 
 class Beacon {
   beaconScanner: BeaconScanner;
 
-  constructor(onadvertisement: (details: TiltPayload) => void) {
+  constructor(onAdvertisement: (details: TiltPayload) => void) {
     this.beaconScanner = create_beacon_scanner();
-    this.beaconScanner.onadvertisement = (details: IBeaconReading) => {
-      onadvertisement(toTiltPayload(details));
-    };
+    this.beaconScanner.onadvertisement = (details) =>
+      onAdvertisement(toTiltPayload(details));
+
     this.beaconScanner
       .startScan()
       .then(() => {
@@ -139,6 +145,10 @@ class Beacon {
       .catch((error: unknown) => {
         console.error(error);
       });
+  }
+
+  stopScan() {
+    this.beaconScanner.stopScan();
   }
 }
 

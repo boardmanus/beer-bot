@@ -28,9 +28,7 @@ class TiltPayload {
   uuid: string;
   timestamp: number;
   temperature: number;
-  ftemperature: number;
   gravity: number;
-  fgravity: number;
   rssi: number;
   color: TiltColor;
 
@@ -42,11 +40,9 @@ class TiltPayload {
   ) {
     // Build the payload by default
     this.uuid = uuid;
-    this.timestamp = Date.now();
+    this.timestamp = Date.now() / 1000.0;
     this.temperature = Utils.f_to_c(temperature);
-    this.ftemperature = this.temperature;
     this.gravity = gravity;
-    this.fgravity = this.gravity;
     this.rssi = rssi;
     this.color = TILT_UUIDS[normalize_uuid(uuid)];
   }
@@ -62,4 +58,4 @@ class TiltPayload {
   }
 }
 
-export { TiltPayload, TiltColor };
+export { TiltPayload, TiltColor, TILT_UUIDS };
