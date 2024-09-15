@@ -9,7 +9,7 @@ import * as fs from 'fs';
 import path from 'path';
 import * as https from 'https';
 import * as http from 'http';
-import { Config, Beer } from 'config';
+import { Config, Beer } from './config';
 import { Server, Socket } from 'socket.io';
 import express, { Express, Request, Response } from 'express';
 
