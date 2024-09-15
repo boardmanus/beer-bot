@@ -98,10 +98,13 @@ class FakeBeacon implements BeaconScanner {
     const promise = new Promise((resolve: (value: void) => void) => {
       this.timer = setInterval(() => {
         this.reading.update(new Date().getTime());
-        this.minor =
-          1000.0 * (this.reading.gravity + Utils.noise(NOISE_GRAVITY));
-        this.major = Utils.c_to_f(
-          this.reading.temperature + Utils.noise(NOISE_TEMPERATURE)
+        this.minor = Math.round(
+          1000.0 * this.reading.gravity + Utils.noise(NOISE_GRAVITY)
+        );
+        this.major = Math.round(
+          Utils.c_to_f(
+            this.reading.temperature + Utils.noise(NOISE_TEMPERATURE)
+          )
         );
 
         const beacon: IBeaconReading = {

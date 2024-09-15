@@ -4,8 +4,9 @@ import * as config from '../config/config.json';
 
 type OnTiltPayload = (payload: TiltPayload) => void;
 
-const TEMPERATURE_RC = (config?.cloud?.report_period_s ?? 120.0) / 2.0;
-const GRAVITY_RC = TEMPERATURE_RC;
+const LOGGING_RC = (config?.cloud?.report_period_s ?? 120.0) / 2.0;
+const TEMPERATURE_RC = LOGGING_RC;
+const GRAVITY_RC = LOGGING_RC;
 
 class Tilt {
   private tFilter = new LowPassFilter(TEMPERATURE_RC);
