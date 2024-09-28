@@ -55,7 +55,7 @@ class TiltPayload {
     return (
       this.color != null &&
       this.temperature < 100.0 &&
-      this.temperature > 0.0 &&
+      this.temperature > -10.0 &&
       this.gravity < 1.2 &&
       this.gravity > 0.9
     );
