@@ -1,5 +1,6 @@
 {
   "server": {
+    "address": "localhost",
     "useHttps": false,
     "LCDd": "localhost"
   },

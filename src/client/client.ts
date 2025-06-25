@@ -3,10 +3,13 @@ import { Utils } from '../common/utils';
 import $ from 'jquery';
 import io from 'socket.io-client';
 import { SVG, registerWindow } from '@svgdotjs/svg.js';
+import * as beerbot_config from '../config/config.json';
+
+const SERVER_ADDRESS = beerbot_config?.server?.address ?? 'localhost';
 
 registerWindow(window, document);
 
-const socket = io();
+const socket = io(`http://${SERVER_ADDRESS}:3000`);
 
 type Deets = {
   name: string;

@@ -13,6 +13,7 @@ import { Config, Beer } from './config';
 import { Server, Socket } from 'socket.io';
 import express, { Express, Request, Response } from 'express';
 
+const SERVER_ADDRESS = beerbot_config?.server?.address ?? 'localhost';
 const PORT = 3000;
 const BEER_CONFIG_PATH = path.join(__dirname, 'config/beer_config.json');
 const LCDd_ADDRESS = beerbot_config?.server?.LCDd ?? 'localhost';
@@ -37,7 +38,12 @@ function create_io_server(app: Express): Server {
     server = http.createServer(app);
   }
 
-  const io = new Server(server);
+  const io = new Server(server, {
+    cors: {
+      origin: `http://${SERVER_ADDRESS}:3000`,
+      methods: ['GET', 'POST']
+    }
+  });
 
   server.listen(PORT, () => {
     console.log(`Beer-Bot listening on port ${PORT}!`);

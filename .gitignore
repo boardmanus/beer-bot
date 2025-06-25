@@ -3,6 +3,7 @@ src/config/config.json
 src/config/*.pem
 package-lock.json
 yarn.lock
+.yarn/
 dist-dev/
 dist-pro/
 tsconfig.json
