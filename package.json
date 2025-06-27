@@ -14,9 +14,9 @@
     "start:dev": "pnpm run build:dev && pnpm run run:dev",
     "start:pro": "pnpm run build:pro && pnpm run run:pro",
     "build:client:dev": "esbuild src/client/client.ts --sourcemap --platform=browser --bundle --outfile=dist-dev/public/scripts/client.js",
-    "build:server:dev": "esbuild src/server/server.ts --sourcemap --platform=node --bundle --outfile=dist-dev/server.js --external:noble --loader:.node=file",
+    "build:server:dev": "esbuild src/server/server.ts --sourcemap --platform=node --bundle --packages=external --outfile=dist-dev/server.js",
     "build:client:pro": "esbuild src/client/client.ts --sourcemap --platform=browser --bundle --minify --outfile=dist-pro/public/scripts/client.js --metafile=client-metafile.json ",
-    "build:server:pro": "esbuild src/server/server.ts --sourcemap --platform=node --bundle --minify --outfile=dist-pro/server.js --external:noble --loader:.node=file --metafile=server-metafile.json",
+    "build:server:pro": "esbuild src/server/server.ts --sourcemap --platform=node --bundle --packages=external --minify --outfile=dist-pro/server.js --metafile=server-metafile.json",
     "test": "jest"
   },
   "nodemonConfig": {
