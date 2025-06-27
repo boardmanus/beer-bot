@@ -1,0 +1,8 @@
+ignoredBuiltDependencies:
+
+onlyBuiltDependencies:
+  - '@abandonware/bluetooth-hci-socket'
+  - '@abandonware/noble'
+  - esbuild
+  - unrs-resolver
+  - usb
