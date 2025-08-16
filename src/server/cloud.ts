@@ -9,7 +9,7 @@ const CLOUD_URL = beerbot_config.cloud?.url ?? '';
 const CLOUD_REPORT_PERIOD_S = beerbot_config?.cloud?.report_period_s ?? 300.0;
 
 function timestamp_to_googlesheettime(t: number) {
-  return t / 86400000.0 + 25568.0;
+  return t / 86400.0 + 25568.0;
 }
 
 function payloadToCloud(beer: string, payload: TiltPayload) {
@@ -43,8 +43,7 @@ class Cloud {
     if (this.lastReportedPayload == null) {
       return true;
     }
-    const dt =
-      payload.timestamp / 1000.0 - this.lastReportedPayload.timestamp / 1000.0;
+    const dt = payload.timestamp - this.lastReportedPayload.timestamp;
     return dt >= CLOUD_REPORT_PERIOD_S;
   }
 
