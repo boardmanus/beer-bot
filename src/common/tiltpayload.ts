@@ -58,4 +58,5 @@ class TiltPayload {
   }
 }
 
-export { TiltPayload, TiltColor, TILT_UUIDS };
+export { TiltPayload, TILT_UUIDS };
+export type { TiltColor };

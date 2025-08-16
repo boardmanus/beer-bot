@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "Preserve",
+    "moduleDetection": "force",
     "esModuleInterop": true,
     "target": "es6",
     "noImplicitAny": true,
-    "moduleResolution": "node",
     "resolveJsonModule": true,
     "sourceMap": true,
     "outDir": "../../dist-server",
@@ -12,7 +12,9 @@
     "paths": {
       "config/*": ["../config/*"],
       "common/*": ["../common/*"]
-    }
+    },
+    "allowJs": true,
+    "isolatedModules": true
   },
   "include": ["./*.ts", "../common/*.ts"]
 }
