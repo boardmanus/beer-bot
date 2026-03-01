@@ -1,6 +1,5 @@
 import { TiltPayload } from '../common/tiltpayload';
 import { Utils } from '../common/utils';
-import $ from 'jquery';
 import io from 'socket.io-client';
 import { SVG, registerWindow } from '@svgdotjs/svg.js';
 import * as beerbot_config from '../config/config.json';
@@ -57,11 +56,11 @@ function validate_data<DataType>(
 ) {
   const valid = is_valid_func(data);
   if (valid) {
-    input.removeClass('invalid');
-    input.val(data);
+    input.classList.remove('invalid');
+    input.value = data;
   } else {
-    if (!input.hasClass('invalid')) {
-      input.addClass('invalid');
+    if (!input.classList.contains('invalid')) {
+      input.classList.add('invalid');
     }
   }
   return valid;
@@ -80,12 +79,10 @@ function update_beer_color(srm: number, beerColorInput: any, svgBeer: any) {
     if (svgBeer) {
       const beerRgb = Utils.srm_to_rgb(srm);
       svgBeer.fill(Utils.rgba_style(beerRgb, 1.0));
-      beerColorInput.css({
-        'background-color': Utils.rgba_style(beerRgb, 0.3)
-      });
+      beerColorInput.style.backgroundColor = Utils.rgba_style(beerRgb, 0.3);
     }
   } else {
-    beerColorInput.css({ 'background-color': '' });
+    beerColorInput.style.backgroundColor = '';
   }
 }
 
@@ -104,19 +101,19 @@ function update_beer_details(jist: Jist, deets: Deets) {
 function update_beer_abv(og: number, g: number, beerAbv: any, svgBeerAbv: any) {
   if (og && g && og > g) {
     const abv = `${Utils.gravity_to_abv(og, g).toFixed(1)}%`;
-    beerAbv.text(abv);
+    beerAbv.innerText = abv;
     svgBeerAbv.text(abv);
   } else {
-    beerAbv.text('-');
+    beerAbv.innerText = '-';
     svgBeerAbv.text('');
   }
 }
 
 function update_meas(jist: Jist, meas: any) {
-  jist.beerTemperature.text(`${meas.temperature.toFixed(1)}C`);
-  jist.beerGravity.text(`${meas.gravity.toFixed(3)}SG`);
+  jist.beerTemperature.innerText = `${meas.temperature.toFixed(1)}C`;
+  jist.beerGravity.innerText = `${meas.gravity.toFixed(3)}SG`;
   update_beer_abv(
-    jist.beerOg.val(),
+    jist.beerOg.value,
     meas.gravity,
     jist.beerAbv,
     jist.svgBeerAbv
@@ -149,13 +146,16 @@ function update_fermenter_tilt(jist: Jist, meas: any) {
   update_airlock(jist, meas);
 }
 
-function update_fermenter_svg(jist: Jist, contents: any) {
-  const svgContents = $('svg', contents).html();
-  jist.image.svg(svgContents);
-  jist.image.viewbox(0, 0, 80, 130);
+function update_fermenter_svg(jist: Jist, svgContents: string) {
+  const parser = new DOMParser();
+  const svgDoc = parser.parseFromString(svgContents, 'image/svg+xml');
+  const svgBody = svgDoc.querySelector('svg');
 
+  jist.image.svg(svgBody.innerHTML).viewbox(0, 0, 80, 130);
   jist.svgBeer = jist.image.find('#Beer');
   jist.svgBeerName = jist.image.find('#BeerName');
+  console.log(`update_fermenter_svg`);
+
   jist.svgBeerAbv = jist.image.find('#BeerAbv');
   jist.svgTilt = jist.image.find('#Tilt');
   jist.svgTiltText = jist.image.find('#TiltDetails');
@@ -169,9 +169,9 @@ function update_fermenter_svg(jist: Jist, contents: any) {
 
 function submit_beer_details(jist: Jist) {
   const deets: Deets = {
-    name: jist.beerName.val(),
-    color_srm: jist.beerColor.val(),
-    og: jist.beerOg.val()
+    name: jist.beerName.value,
+    color_srm: jist.beerColor.value,
+    og: jist.beerOg.value
   };
 
   update_beer_name(deets.name, jist.beerName, jist.svgBeerName);
@@ -207,16 +207,16 @@ type Jist = {
   svgAnimation: any | null;
 };
 
-$(() => {
+document.addEventListener("DOMContentLoaded", () => {
   const jist: Jist = {
-    image: SVG('#svgimage'),
-    beerName: $('#beername'),
-    beerColor: $('#beercolor'),
-    beerOg: $('#og'),
-    beerSubmit: $('#beersubmit'),
-    beerTemperature: $('#temperature'),
-    beerGravity: $('#gravity'),
-    beerAbv: $('#abv'),
+    image: SVG("#svgimage"),
+    beerName: document.getElementById('beername'),
+    beerColor: document.getElementById('beercolor'),
+    beerOg: document.getElementById('og'),
+    beerSubmit: document.getElementById('beersubmit'),
+    beerTemperature: document.getElementById('temperature'),
+    beerGravity: document.getElementById('gravity'),
+    beerAbv: document.getElementById('abv'),
     svgBeer: null,
     svgBeerName: null,
     svgBeerAbv: null,
@@ -227,35 +227,38 @@ $(() => {
     svgAnimation: null
   };
 
-  $.get(
-    '/images/fermenter.svg',
-    (content) => {
-      update_fermenter_svg(jist, content);
-    },
-    'xml'
-  );
+  fetch('/images/fermenter.svg')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok: ' + response.statusText);
+      }
+      return response.text();
+    }).then(content => update_fermenter_svg(jist, content))
+    .catch(error => {
+      console.error(`Failed loading fermenter: ${error}`)
+    });
 
-  jist.beerName.on('keyup change', () => {
+  jist.beerName.addEventListener('keyup', () => {
     update_beer_name(
-      String(jist.beerName.val()),
+      String(jist.beerName.value),
       jist.beerName,
       jist.svgBeerName
     );
   });
 
-  jist.beerColor.on('keyup change', () => {
+  jist.beerColor.addEventListener('keyup', () => {
     update_beer_color(
-      Number(jist.beerColor.val()),
+      Number(jist.beerColor.value),
       jist.beerColor,
       jist.svgBeer
     );
   });
 
-  jist.beerOg.on('keyup change', () => {
-    update_beer_og(Number(jist.beerOg.val()), jist.beerOg);
+  jist.beerOg.addEventListener('keyup', () => {
+    update_beer_og(Number(jist.beerOg.value), jist.beerOg);
   });
 
-  jist.beerSubmit.on('click', () => {
+  jist.beerSubmit.addEventListener('click', () => {
     submit_beer_details(jist);
     return false;
   });

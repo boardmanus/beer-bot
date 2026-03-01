@@ -1,18 +1,26 @@
 {
   "compilerOptions": {
-    "module": "es6",
+    "module": "esnext",
     "target": "es6",
     "noImplicitAny": true,
     "esModuleInterop": true,
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
+    "skipLibCheck": true,
     "sourceMap": true,
     "outDir": "../../dist-client",
     "baseUrl": ".",
     "paths": {
-      "config/*": ["../config/*"],
-      "common/*": ["../common/*"]
+      "config/*": [
+        "../config/*"
+      ],
+      "common/*": [
+        "../common/*"
+      ]
     }
   },
-  "include": ["./*.ts", "../common/*.ts"]
+  "include": [
+    "./*.ts",
+    "../common/*.ts"
+  ]
 }

@@ -6,15 +6,23 @@
     "target": "es6",
     "noImplicitAny": true,
     "resolveJsonModule": true,
+    "skipLibCheck": true,
     "sourceMap": true,
     "outDir": "../../dist-server",
     "baseUrl": ".",
     "paths": {
-      "config/*": ["../config/*"],
-      "common/*": ["../common/*"]
+      "config/*": [
+        "../config/*"
+      ],
+      "common/*": [
+        "../common/*"
+      ]
     },
     "allowJs": true,
     "isolatedModules": true
   },
-  "include": ["./*.ts", "../common/*.ts"]
+  "include": [
+    "./*.ts",
+    "../common/*.ts"
+  ]
 }
