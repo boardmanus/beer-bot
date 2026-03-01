@@ -35,4 +35,4 @@ and beer colour (in SRM units) to be configured.
 The name is used to log Tilt measurements to the correct Google Sheet, automatically
 creating new entries.
 
-![Screenshot](Documentation/readme/brew-bot-webapp.png)
+![Screenshot](docs/readme/brew-bot-webapp.png)

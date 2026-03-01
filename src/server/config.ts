@@ -49,7 +49,7 @@ export class Config {
   // Create a Beer configuration, reading a JSON file at the given path.
   constructor(path: string) {
     this.path = path;
-    this.onChange = (_beer: Beer) => {};
+    this.onChange = (_beer: Beer) => { };
     this.beerValue = Config.readConfig(path, this.beerValue);
   }
 
@@ -64,9 +64,10 @@ export class Config {
   }
 
   // Update the Beer configuration with the given JSON string.
-  update(beerJson: string) {
+  update(beerJson: string): Beer {
     this.beerValue = Config.writeConfig(this.path, beerJson, this.beer);
     this.onChange(this.beer);
+    return this.beer;
   }
 
   private static readConfig(path: string, orig: Beer): Beer {

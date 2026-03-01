@@ -43,6 +43,7 @@
   "dependencies": {
     "@abandonware/noble": "1.9.2-26",
     "@svgdotjs/svg.js": "^3.2.5",
+    "body-parser": "^2.2.2",
     "express": "^5.2.1",
     "needle": "^3.3.1",
     "node-beacon-scanner": "^0.2.2",
@@ -53,6 +54,7 @@
   "devDependencies": {
     "@eslint/config-array": "^0.23.2",
     "@eslint/object-schema": "^3.0.2",
+    "@types/body-parser": "^1.19.6",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/needle": "^3.3.0",

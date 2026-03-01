@@ -17,6 +17,9 @@ importers:
       '@svgdotjs/svg.js':
         specifier: ^3.2.5
         version: 3.2.5
+      body-parser:
+        specifier: ^2.2.2
+        version: 2.2.2
       express:
         specifier: ^5.2.1
         version: 5.2.1
@@ -42,6 +45,9 @@ importers:
       '@eslint/object-schema':
         specifier: ^3.0.2
         version: 3.0.2
+      '@types/body-parser':
+        specifier: ^1.19.6
+        version: 1.19.6
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
