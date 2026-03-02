@@ -52,7 +52,7 @@ function create_beacon_scanner(): BeaconScanner {
 }
 
 const START_TEMPERATURE = 21.1;
-const START_GRAVITY = 1.1;
+const START_GRAVITY = 1.03;
 const NOISE_TEMPERATURE = 2.0;
 const NOISE_GRAVITY = 0.02;
 

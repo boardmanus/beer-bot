@@ -3,10 +3,9 @@ import { Utils } from '../common/utils';
 import * as svg from '@svgdotjs/svg.js';
 import * as beerbot_config from '../config/config.json';
 
-const SERVER_ADDRESS = beerbot_config?.server?.address ?? 'localhost';
-
 svg.registerWindow(window, document);
 
+const SERVER_ADDRESS = beerbot_config?.server?.address ?? 'localhost';
 const SERVER_URL = `http://${SERVER_ADDRESS}:3000`;
 
 type Deets = {
@@ -33,9 +32,6 @@ const TILT_COLOR_TO_FILL: { [color: string]: string } = {
   Orange: '#f2ba73'
 };
 
-let lastBeerDetails = DEFAULT_BEER_DETAILS;
-let lastTiltMeas = DEFAULT_MEAS;
-
 function is_valid_beer_name(name: string) {
   return name.length > 0 && name.length < 64;
 }
@@ -51,13 +47,13 @@ function is_valid_beer_og(og: number) {
 function validate_data<DataType>(
   data: DataType,
   is_valid_func: (val: DataType) => boolean,
-  input: any
+  input: HTMLInputElement
 ) {
   const valid = is_valid_func(data);
   if (valid) {
     input.classList.remove('invalid');
-    input.value = data;
   } else {
+    console.log(`validate-data: invalid='${data}'`)
     if (!input.classList.contains('invalid')) {
       input.classList.add('invalid');
     }
@@ -65,244 +61,228 @@ function validate_data<DataType>(
   return valid;
 }
 
-function update_beer_name(name: string, beerNameInput: any, svgBeerName: any) {
-  if (validate_data(name, is_valid_beer_name, beerNameInput)) {
-    if (svgBeerName) {
-      svgBeerName.text(name);
-    }
-  }
-}
+class Jist {
+  tiltPayloadEvent = new EventSource(`${SERVER_URL}/tilt-meas`);
+  beerName = document.getElementById('beername') as HTMLInputElement;
+  beerColor = document.getElementById('beercolor') as HTMLInputElement;
+  beerOg = document.getElementById('og') as HTMLInputElement;
+  beerSubmit = document.getElementById('beersubmit') as HTMLButtonElement;
+  beerTemperature = document.getElementById('temperature') as HTMLElement;
+  beerGravity = document.getElementById('gravity') as HTMLElement;
+  beerAbv = document.getElementById('abv') as HTMLElement;
+  image = svg.SVG("#svgimage") as svg.Container;
+  svgBeer: svg.Rect | null = null;
+  svgBeerName: svg.Text | null = null;
+  svgBeerAbv: svg.Text | null = null;
+  svgTilt: svg.G | null = null;
+  svgTiltText: svg.Text | null = null;
+  svgTiltFrame: svg.Rect | null = null;
+  svgLiquidPath: svg.Path | null = null;
+  svgAnimation: svg.Element | null = null;
+  lastBeerDetails = DEFAULT_BEER_DETAILS;
+  lastTiltMeas = DEFAULT_MEAS;
 
-function update_beer_color(srm: number, beerColorInput: any, svgBeer: any) {
-  if (validate_data(srm, is_valid_beer_color, beerColorInput)) {
-    if (svgBeer) {
-      const beerRgb = Utils.srm_to_rgb(srm);
-      svgBeer.fill(Utils.rgba_style(beerRgb, 1.0));
-      beerColorInput.style.backgroundColor = Utils.rgba_style(beerRgb, 0.3);
-    }
-  } else {
-    beerColorInput.style.backgroundColor = '';
-  }
-}
+  constructor() {
 
-function update_beer_og(og: number, beerog: any) {
-  validate_data(og, is_valid_beer_og, beerog);
-}
-
-function update_beer_details(jist: Jist, deets: Deets) {
-  console.log('update-beer-details: ', deets);
-  update_beer_name(deets.name, jist.beerName, jist.svgBeerName);
-  update_beer_color(deets.color_srm, jist.beerColor, jist.svgBeer);
-  update_beer_og(deets.og, jist.beerOg);
-  lastBeerDetails = deets;
-}
-
-function update_beer_abv(og: number, g: number, beerAbv: any, svgBeerAbv: any) {
-  if (og && g && og > g) {
-    const abv = `${Utils.gravity_to_abv(og, g).toFixed(1)}%`;
-    beerAbv.innerText = abv;
-    svgBeerAbv.text(abv);
-  } else {
-    beerAbv.innerText = '-';
-    svgBeerAbv.text('');
-  }
-}
-
-function update_meas(jist: Jist, meas: any) {
-  jist.beerTemperature.innerText = `${meas.temperature.toFixed(1)}C`;
-  jist.beerGravity.innerText = `${meas.gravity.toFixed(3)}SG`;
-  update_beer_abv(
-    lastBeerDetails.og,
-    meas.gravity,
-    jist.beerAbv,
-    jist.svgBeerAbv
-  );
-  lastTiltMeas = meas;
-}
-
-function update_airlock(jist: Jist, meas: any) {
-  //jist.svgAnimation.attr("dur", `${meas.temperature}s`);
-}
-
-function update_tilt(jist: Jist, meas: any) {
-  jist.svgTiltFrame.fill(TILT_COLOR_TO_FILL[meas.color]);
-
-  const text = `${meas.temperature.toFixed(1)}C, ${meas.gravity.toFixed(3)}SG`;
-  jist.svgTiltText.text(text);
-
-  let tiltAngle = 10.0 + (meas.gravity - 1.0) * 600.0;
-  if (tiltAngle > 70.0) {
-    tiltAngle = 70.0;
-  }
-
-  const newRotation = 90.0 - tiltAngle;
-  jist.svgTilt.attr('transform', `translate(38, 78) rotate(${newRotation})`);
-}
-
-function update_fermenter_tilt(jist: Jist, meas: any) {
-  update_meas(jist, meas);
-  update_tilt(jist, meas);
-  update_airlock(jist, meas);
-}
-
-function update_fermenter_svg(jist: Jist, svgContents: string) {
-  const parser = new DOMParser();
-  const svgDoc = parser.parseFromString(svgContents, 'image/svg+xml');
-  const svgBody = svgDoc.querySelector('svg');
-
-  jist.image.svg(svgBody.innerHTML).viewbox(0, 0, 80, 130);
-  jist.svgBeer = jist.image.findOne('#Beer') as svg.Rect;
-  jist.svgBeerName = jist.image.findOne('#BeerName') as svg.Text;
-  jist.svgBeerAbv = jist.image.findOne('#BeerAbv') as svg.Text;
-  jist.svgTilt = jist.image.findOne('#Tilt') as svg.G;
-  jist.svgTiltText = jist.image.findOne('#TiltDetails') as svg.Text;
-  jist.svgTiltFrame = jist.image.findOne('#TiltFrame') as svg.Rect;
-  jist.svgLiquidPath = jist.image.findOne('#Liquid') as svg.Path;
-  jist.svgAnimation = jist.image.findOne('#Animation') as svg.Element;
-
-  update_beer_details(jist, lastBeerDetails);
-  update_fermenter_tilt(jist, lastTiltMeas);
-}
-
-function post_json(jist: Jist, path: string, json: string, rspHandler: (jist: Jist, json_obj: any) => void) {
-  console.log(`post-json path=${path}, json=${json}`);
-  fetch(`${SERVER_URL}/${path}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: json,
-  }).then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok: ' + response.statusText);
-    }
-    return response.json(); // or response.text() based on your API
-  }).then(json => {
-    console.log(`post-json path=${path} => response=${json}`);
-    rspHandler(jist, JSON.parse(json));
-  }).catch(error => {
-    console.error(`post-json path=${path} => error=${error}`);
-  });
-}
-
-function fetch_json(jist: Jist, path: string, jsonHandler: (jist: Jist, json_obj: any) => void) {
-  // Function to periodically fetch tilt measurements
-  fetch(`${SERVER_URL}/${path}`)
-    .then(response => response.json())
-    .then(msg => {
-      console.log(`fetched from ${path}: ${msg}`);
-      jsonHandler(jist, JSON.parse(msg));
-    })
-    .catch(error => {
-      console.error(`Failed to fetch from ${path}: ${error}`);
+    this.beerName.addEventListener('keyup', () => {
+      this.updateBeerName(this.beerName.value);
+      this.beerSubmit.disabled = !this.beerDetailsChanged(this.lastBeerDetails);
     });
-}
 
-function submit_beer_details(jist: Jist) {
-  const deets: Deets = {
-    name: jist.beerName.value,
-    color_srm: Number(jist.beerColor.value),
-    og: Number(jist.beerOg.value)
-  };
+    const beer_color_event = () => {
+      this.updateBeerColor(Number(this.beerColor.value));
+      this.beerSubmit.disabled = !this.beerDetailsChanged(this.lastBeerDetails);
+    };
+    this.beerColor.addEventListener('input', beer_color_event);
+    this.beerColor.addEventListener('keyup', beer_color_event);
 
-  update_beer_name(deets.name, jist.beerName, jist.svgBeerName);
-  update_beer_color(deets.color_srm, jist.beerColor, jist.svgBeer);
-  update_beer_og(deets.og, jist.beerOg);
-  update_beer_abv(
-    deets.og,
-    lastTiltMeas.gravity,
-    jist.beerAbv,
-    jist.svgBeerAbv
-  );
+    const beer_og_event = () => {
+      this.updateBeerOg(Number(this.beerOg.value));
+      this.beerSubmit.disabled = !this.beerDetailsChanged(this.lastBeerDetails);
+    };
+    this.beerOg.addEventListener('input', beer_og_event);
+    this.beerOg.addEventListener('keyup', beer_og_event);
 
-  post_json(jist, 'beer-details', JSON.stringify(deets), update_beer_details);
-}
+    this.beerSubmit.addEventListener('click', () => this.submit_beer_details());
 
-type Jist = {
-  tiltPayloadEvent: EventSource,
-  image: svg.Container;
-  beerName: HTMLInputElement;
-  beerColor: HTMLInputElement;
-  beerOg: HTMLInputElement;
-  beerSubmit: HTMLButtonElement;
-  beerTemperature: HTMLElement;
-  beerGravity: HTMLElement;
-  beerAbv: HTMLElement;
-  svgBeer: svg.Rect | null;
-  svgBeerName: svg.Text | null;
-  svgBeerAbv: svg.Text | null;
-  svgTilt: svg.G | null;
-  svgTiltText: svg.Text | null;
-  svgTiltFrame: svg.Rect | null;
-  svgLiquidPath: svg.Path | null;
-  svgAnimation: svg.Element | null;
-};
+    this.tiltPayloadEvent.onmessage = (event: MessageEvent) => this.updateFermenterTilt(JSON.parse(event.data));
+    this.tiltPayloadEvent.onerror = (event: Event) => console.error('EventSource failed:', event);
 
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM Contents loaded...");
-  const jist: Jist = {
-    tiltPayloadEvent: new EventSource(`${SERVER_URL}/tilt-meas`),
-    image: svg.SVG("#svgimage") as svg.Container,
-    beerName: document.getElementById('beername') as HTMLInputElement,
-    beerColor: document.getElementById('beercolor') as HTMLInputElement,
-    beerOg: document.getElementById('og') as HTMLInputElement,
-    beerSubmit: document.getElementById('beersubmit') as HTMLButtonElement,
-    beerTemperature: document.getElementById('temperature'),
-    beerGravity: document.getElementById('gravity'),
-    beerAbv: document.getElementById('abv'),
-    svgBeer: null,
-    svgBeerName: null,
-    svgBeerAbv: null,
-    svgTilt: null,
-    svgTiltText: null,
-    svgTiltFrame: null,
-    svgLiquidPath: null,
-    svgAnimation: null,
-  };
+    this.fetchFermenterSvg();
+    this.fetchBeerDetails();
+  }
 
-  fetch('/images/fermenter.svg')
-    .then(response => {
+  beerDetailsChanged(deets: Deets): boolean {
+    return deets.og != Number(this.beerOg.value)
+      || deets.color_srm != Number(this.beerColor.value)
+      || deets.name != this.beerName.value;
+  }
+
+  updateAirlock(meas: any) {
+    //jist.svgAnimation.attr("dur", `${meas.temperature}s`);
+  }
+
+  updateTilt(meas: any) {
+    this.svgTiltFrame.fill(TILT_COLOR_TO_FILL[meas.color]);
+
+    const text = `${meas.temperature.toFixed(1)}C, ${meas.gravity.toFixed(3)}SG`;
+    this.svgTiltText.text(text);
+
+    let tiltAngle = 10.0 + (meas.gravity - 1.0) * 600.0;
+    if (tiltAngle > 70.0) {
+      tiltAngle = 70.0;
+    }
+
+    const newRotation = 90.0 - tiltAngle;
+    this.svgTilt.attr('transform', `translate(38, 78) rotate(${newRotation})`);
+  }
+
+  updateFermenterTilt(meas: any) {
+    this.updateMeas(meas);
+    this.updateTilt(meas);
+    this.updateAirlock(meas);
+  }
+
+  updateBeerOg(og: number, update = false) {
+    console.log(`update-beer-og: ${og}`);
+    if (validate_data(og, is_valid_beer_og, this.beerOg)) {
+      this.updateBeerAbv(og, this.lastTiltMeas.gravity);
+      if (update) {
+        this.beerOg.value = String(og);
+      }
+    }
+  }
+
+  updateBeerName(name: string, update = false) {
+    if (validate_data(name, is_valid_beer_name, this.beerName)) {
+      this.svgBeerName?.text(name);
+      if (update) {
+        this.beerName.value = name;
+      }
+    }
+  }
+
+  updateBeerColor(srm: number, update = false) {
+    if (validate_data(srm, is_valid_beer_color, this.beerColor)) {
+      const beerRgb = Utils.srm_to_rgb(srm);
+      this.svgBeer?.fill(Utils.rgba_style(beerRgb, 1.0));
+      this.beerColor.style.backgroundColor = Utils.rgba_style(beerRgb, 0.3);
+      if (update) {
+        this.beerColor.value = String(srm);
+      }
+    } else {
+      this.beerColor.style.backgroundColor = '';
+    }
+  }
+
+  updateBeerAbv(og: number, g: number) {
+    if (og && g && og > g) {
+      const abv = `${Utils.gravity_to_abv(og, g).toFixed(1)}%`;
+      this.beerAbv.innerText = abv;
+      this.svgBeerAbv?.text(abv);
+    } else {
+      this.beerAbv.innerText = '-';
+      this?.svgBeerAbv.text('');
+    }
+  }
+
+  updateMeas(meas: any) {
+    this.beerTemperature.innerText = `${meas.temperature.toFixed(1)}C`;
+    this.beerGravity.innerText = `${meas.gravity.toFixed(3)}SG`;
+    this.updateBeerAbv(this.lastBeerDetails.og, meas.gravity);
+    this.lastTiltMeas = meas;
+  }
+
+  updateBeerDetails(deets: Deets, disable = false) {
+    console.log('update-beer-details: ', deets);
+    this.updateBeerName(deets.name, true);
+    this.updateBeerColor(deets.color_srm, true);
+    this.updateBeerOg(deets.og, true);
+    this.lastBeerDetails = deets;
+    this.beerName.disabled = disable;
+    this.beerColor.disabled = disable;
+    this.beerOg.disabled = disable;
+    this.beerSubmit.disabled = disable || !this.beerDetailsChanged(deets);
+  }
+
+  updateFermenterSvg(svgContents: string) {
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(svgContents, 'image/svg+xml');
+    const svgBody = svgDoc.querySelector('svg');
+
+    this.image.svg(svgBody.innerHTML).viewbox(0, 0, 80, 130);
+    this.svgBeer = this.image.findOne('#Beer') as svg.Rect;
+    this.svgBeerName = this.image.findOne('#BeerName') as svg.Text;
+    this.svgBeerAbv = this.image.findOne('#BeerAbv') as svg.Text;
+    this.svgTilt = this.image.findOne('#Tilt') as svg.G;
+    this.svgTiltText = this.image.findOne('#TiltDetails') as svg.Text;
+    this.svgTiltFrame = this.image.findOne('#TiltFrame') as svg.Rect;
+    this.svgLiquidPath = this.image.findOne('#Liquid') as svg.Path;
+    this.svgAnimation = this.image.findOne('#Animation') as svg.Element;
+
+    this.updateBeerDetails(this.lastBeerDetails);
+    this.updateFermenterTilt(this.lastTiltMeas);
+  }
+
+  deets(): Deets {
+    return {
+      name: this.beerName.value,
+      color_srm: Number(this.beerColor.value),
+      og: Number(this.beerOg.value)
+    };
+  }
+
+  submit_beer_details() {
+    const deets = this.deets();
+    this.updateBeerName(deets.name, true);
+    this.updateBeerColor(deets.color_srm, true);
+    this.updateBeerOg(deets.og, true);
+    this.updateBeerAbv(deets.og, this.lastTiltMeas.gravity);
+    this.beerSubmit.disabled = true;
+    this.postBeerDetails(deets);
+  }
+
+  postBeerDetails(deets: Deets) {
+    console.log(`post-beer-details: deets=${deets}`);
+    fetch(`${SERVER_URL}/beer-details`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(deets),
+    }).then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok: ' + response.statusText);
       }
-      return response.text();
-    }).then(content => update_fermenter_svg(jist, content))
-    .catch(error => {
-      console.error(`Failed loading fermenter: ${error}`)
+      return response.json();
+    }).then(json => {
+      console.log(`post-beer-details: response=${json}`);
+      this.updateBeerDetails(JSON.parse(json));
+    }).catch(error => {
+      console.error(`post-beer-details: error=${error}`);
     });
+  }
 
-  jist.beerName.addEventListener('keyup', () => {
-    update_beer_name(
-      String(jist.beerName.innerText),
-      jist.beerName,
-      jist.svgBeerName
-    );
-  });
+  fetchBeerDetails() {
+    fetch(`${SERVER_URL}/beer-details`)
+      .then(response => response.json())
+      .then(msg => this.updateBeerDetails(JSON.parse(msg)))
+      .catch(error => {
+        console.error(`fetch-beer-details: error=${error}`);
+      });
+  }
 
-  jist.beerColor.addEventListener('keyup', () => {
-    update_beer_color(
-      Number(jist.beerColor.innerText),
-      jist.beerColor,
-      jist.svgBeer
-    );
-  });
+  fetchFermenterSvg() {
+    fetch('/images/fermenter.svg')
+      .then(response => response.text())
+      .then(content => this.updateFermenterSvg(content))
+      .catch(error => {
+        console.error(`fetch-fermenter-svg: error=${error}`);
+      });
+  }
+}
 
-  jist.beerOg.addEventListener('keyup', () => {
-    update_beer_og(Number(jist.beerOg.innerText), jist.beerOg);
-  });
-
-  jist.beerSubmit.addEventListener('click', () => {
-    submit_beer_details(jist);
-    return false;
-  });
-
-  fetch_json(jist, 'beer-details', update_beer_details);
-
-  // Handle incoming messages
-  jist.tiltPayloadEvent.onmessage = (event: MessageEvent) => update_fermenter_tilt(jist, JSON.parse(event.data));
-
-  // Handle errors
-  jist.tiltPayloadEvent.onerror = function (event: Event) {
-    console.error('EventSource failed:', event);
-  };
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM Contents loaded...");
+  const jist = new Jist();
 });
