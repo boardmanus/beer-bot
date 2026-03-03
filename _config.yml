@@ -1,3 +1,4 @@
 theme: jekyll-theme-minimal
 title: Beer-Bot
 description: A simple site that reads Tilt Hydrometer beacons, and displays the state of fermentation.
+markdown: GFM
