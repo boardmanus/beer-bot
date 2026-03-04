@@ -1,4 +1,4 @@
-- Raspberry Pi Setup
+= Raspberry Pi Setup
 
 - Install and Setup using the [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
   - This will allow you to flash the sdcard, and setup user, host and networking
