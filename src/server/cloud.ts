@@ -1,5 +1,5 @@
 import * as beerbot_config from '../config/config.json';
-import { Config, Beer } from './config';
+import { LowPassFilter } from '../common/low_pass_filter';
 import { Utils } from '../common/utils';
 import { TiltPayload } from '../common/tiltpayload';
 import * as request from 'needle';
@@ -7,31 +7,22 @@ import * as request from 'needle';
 const CLOUD_ENABLED = beerbot_config.cloud?.enabled ?? false;
 const CLOUD_URL = beerbot_config.cloud?.url ?? '';
 const CLOUD_REPORT_PERIOD_S = beerbot_config?.cloud?.report_period_s ?? 300.0;
+const LOGGING_RC = (beerbot_config?.cloud?.report_period_s ?? 120.0) * 2.0;
+const TEMPERATURE_RC = LOGGING_RC;
+const GRAVITY_RC = LOGGING_RC;
 
 function timestamp_to_googlesheettime(t: number) {
   return t / 86400.0 + 25568.0;
 }
 
-function payloadToCloud(beer: string, payload: TiltPayload) {
-  const cloud = {
-    Beer: beer,
-    Temp: Utils.c_to_f(payload.temperature),
-    SG: payload.gravity,
-    Color: payload.color,
-    Comment: '',
-    Timepoint: timestamp_to_googlesheettime(payload.timestamp)
-  };
-  return cloud;
-}
-
 class Cloud {
-  config: Config;
-  beerName: string;
-  lastReportedPayload: TiltPayload | null;
+  private beerName: string;
+  private lastReportedPayload: TiltPayload | null;
+  private tFilter = new LowPassFilter(TEMPERATURE_RC);
+  private gFilter = new LowPassFilter(GRAVITY_RC);
 
-  constructor(config: Config) {
-    this.config = config;
-    this.beerName = config.beer.name ?? 'Unnamed Beer';
+  constructor(beerName = "Unamed Beer") {
+    this.beerName = beerName;
     this.lastReportedPayload = null;
   }
 
@@ -47,9 +38,9 @@ class Cloud {
     return dt >= CLOUD_REPORT_PERIOD_S;
   }
 
-  onBeerChange(beer: Beer) {
-    if (beer.name !== this.beerName) {
-      this.beerName = beer.name;
+  onBeerChange(beerName: string) {
+    if (beerName !== this.beerName) {
+      this.beerName = beerName;
       this.lastReportedPayload = null;
     }
   }
@@ -57,7 +48,7 @@ class Cloud {
   onPayload(payload: TiltPayload) {
     if (this.reportToCloud(payload)) {
       this.lastReportedPayload = payload;
-      const cloudData = payloadToCloud(this.beerName, payload);
+      const cloudData = this.payloadToCloud(this.beerName, payload);
 
       request.post(
         CLOUD_URL,
@@ -75,6 +66,18 @@ class Cloud {
         }
       );
     }
+  }
+
+  payloadToCloud(beer: string, payload: TiltPayload) {
+    const cloud = {
+      Beer: beer,
+      Temp: Utils.c_to_f(this.tFilter.update(payload.temperature, payload.timestamp)),
+      SG: this.gFilter.update(payload.gravity, payload.timestamp),
+      Color: payload.color,
+      Comment: '',
+      Timepoint: timestamp_to_googlesheettime(payload.timestamp)
+    };
+    return cloud;
   }
 }
 

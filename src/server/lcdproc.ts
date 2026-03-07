@@ -1,5 +1,10 @@
 import { TiltPayload } from '../common/tiltpayload';
 import { Socket } from 'net';
+import { LowPassFilter } from '../common/low_pass_filter';
+
+const RC = 60;
+const TEMPERATURE_RC = RC;
+const GRAVITY_RC = RC;
 
 export class LcdProc {
   private socket: Socket;
@@ -11,6 +16,8 @@ export class LcdProc {
   private lastTemperature = NaN;
   private lastGravity = NaN;
   private updateTimer: NodeJS.Timeout;
+  private gFilter = new LowPassFilter(GRAVITY_RC);
+  private tFilter = new LowPassFilter(TEMPERATURE_RC);
 
   constructor(host: string, port = 13666) {
     this.host = host;
@@ -88,8 +95,8 @@ export class LcdProc {
     if (!this.connected) {
       return;
     }
-    this.lastTemperature = payload.temperature;
-    this.lastGravity = payload.gravity;
+    this.lastTemperature = this.tFilter.update(payload.temperature, payload.timestamp);
+    this.lastGravity = this.gFilter.update(payload.gravity, payload.timestamp);
     this.updateScreen();
   }
 }

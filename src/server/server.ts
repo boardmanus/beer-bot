@@ -1,4 +1,4 @@
-import { Tilt } from './tilt';
+import { Client } from './client';
 import { Cloud } from './cloud';
 import { Beacon } from './beacon';
 import { LcdProc } from './lcdproc';
@@ -13,10 +13,10 @@ import * as bodyParser from 'body-parser';
 import { Config } from './config';
 import express, { Express, Request, Response } from 'express';
 
-const SERVER_ADDRESS = beerbot_config?.server?.address ?? 'localhost';
 const PORT = 3000;
 const BEER_CONFIG_PATH = path.join(__dirname, 'config/beer_config.json');
 const LCDd_ADDRESS = beerbot_config?.server?.LCDd ?? 'localhost';
+const DEFAULT_BEER_NAME = "Unnamed Beer";
 
 type TiltRequest = Request<{
   uuid: string;
@@ -52,10 +52,13 @@ function create_io_server(app: Express): https.Server | http.Server {
 }
 
 function handle_tilt_payload(payload: TiltPayload) {
-  const payloadJson = JSON.stringify(payload);
-  tiltPayloadResponse?.write(`data: ${payloadJson}\n\n`);
-  cloud.onPayload(payload);
-  lcdproc.onPayload(payload);
+  if (payload.isValid()) {
+    client.onPayload(payload);
+    cloud.onPayload(payload);
+    lcdproc.onPayload(payload);
+  } else {
+    console.log(`tilt: invalid=${payload}`);
+  }
 }
 
 function handle_get_root(_req: Request, res: Response) {
@@ -84,33 +87,22 @@ function handle_post_beer_details(req: BeerDetailsRequest, res: Response) {
   const beerJson = JSON.stringify(req.body);
   console.log(`handle-post-beer-details: ${beerJson}`);
   const beer = config.update(beerJson);
-  cloud.onBeerChange(beer);
+  cloud.onBeerChange(beer.name ?? DEFAULT_BEER_NAME);
   res.json(JSON.stringify(beer));
 }
 
 function handle_sse_tilt_meas_connection(req: Request, res: Response) {
-  console.log("handle-sse-tilt-meas-connection: connecting to client...");
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  tiltPayloadResponse = res;
-
-  req.on('close', () => {
-    console.log("Connection to client closed.");
-    tiltPayloadResponse = null;
-    res.end();
-  });
+  client.handleSseTiltMeasConnection(req, res);
 }
 
-const tilt = new Tilt(handle_tilt_payload);
-const _beacon = new Beacon((payload) => tilt.handleTiltPayload(payload));
+const _beacon = new Beacon(handle_tilt_payload);
 const lcdproc = new LcdProc(LCDd_ADDRESS);
 const config = new Config(BEER_CONFIG_PATH);
-const cloud = new Cloud(config);
-let tiltPayloadResponse: Response | null = null;
+const cloud = new Cloud(config.beer?.name ?? DEFAULT_BEER_NAME);
+const client = new Client();
 
 const app: Express = express();
-const server = create_io_server(app);
+const _server = create_io_server(app);
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
