@@ -56,8 +56,6 @@ function handle_tilt_payload(payload: TiltPayload) {
     client.onPayload(payload);
     cloud.onPayload(payload);
     lcdproc.onPayload(payload);
-  } else {
-    console.log(`tilt: invalid=${payload}`);
   }
 }
 
