@@ -70,6 +70,15 @@
       id="TiltFrame"
       fill="#ba73f2"
       style="fill-opacity:0.9;stroke:black;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"/>
+   <circle
+      id="ActivityLed"
+      r="1"
+      cx="-8"
+      cy="-3"
+      stroke="black"
+      stroke-width="0.3"
+      fill="green" 
+   />
    <text
       y="2"
       x="10"

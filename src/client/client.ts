@@ -79,6 +79,7 @@ class Jist {
   svgTiltFrame: svg.Rect | null = null;
   svgLiquidPath: svg.Path | null = null;
   svgAnimation: svg.Element | null = null;
+  svgActivityLed: svg.Circle | null = null;
   lastBeerDetails = DEFAULT_BEER_DETAILS;
   lastTiltMeas = DEFAULT_MEAS;
 
@@ -118,11 +119,11 @@ class Jist {
       || deets.name != this.beerName.value;
   }
 
-  updateAirlock(meas: any) {
+  updateAirlock(meas: TiltPayload) {
     //jist.svgAnimation.attr("dur", `${meas.temperature}s`);
   }
 
-  updateTilt(meas: any) {
+  updateTilt(meas: TiltPayload) {
     this.svgTiltFrame.fill(TILT_COLOR_TO_FILL[meas.color]);
 
     const text = `${meas.temperature.toFixed(1)}C, ${meas.gravity.toFixed(3)}SG`;
@@ -137,10 +138,16 @@ class Jist {
     this.svgTilt.attr('transform', `translate(38, 78) rotate(${newRotation})`);
   }
 
-  updateFermenterTilt(meas: any) {
+  blipActivityLed() {
+    this.svgActivityLed.fill("green");
+    const timeout = setTimeout(() => this.svgActivityLed.fill("none"), 200);
+  }
+
+  updateFermenterTilt(meas: TiltPayload) {
     this.updateMeas(meas);
     this.updateTilt(meas);
     this.updateAirlock(meas);
+    this.blipActivityLed();
   }
 
   updateBeerOg(og: number, update = false) {
@@ -186,7 +193,7 @@ class Jist {
     }
   }
 
-  updateMeas(meas: any) {
+  updateMeas(meas: TiltPayload) {
     this.beerTemperature.innerText = `${meas.temperature.toFixed(1)}C`;
     this.beerGravity.innerText = `${meas.gravity.toFixed(3)}SG`;
     this.updateBeerAbv(this.lastBeerDetails.og, meas.gravity);
@@ -205,7 +212,7 @@ class Jist {
     this.beerSubmit.disabled = disable || !this.beerDetailsChanged(deets);
   }
 
-  updateFermenterSvg(svgContents: string) {
+  initFermenterSvg(svgContents: string) {
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgContents, 'image/svg+xml');
     const svgBody = svgDoc.querySelector('svg');
@@ -219,6 +226,7 @@ class Jist {
     this.svgTiltFrame = this.image.findOne('#TiltFrame') as svg.Rect;
     this.svgLiquidPath = this.image.findOne('#Liquid') as svg.Path;
     this.svgAnimation = this.image.findOne('#Animation') as svg.Element;
+    this.svgActivityLed = this.image.findOne('#ActivityLed') as svg.Circle;
 
     this.updateBeerDetails(this.lastBeerDetails);
     this.updateFermenterTilt(this.lastTiltMeas);
@@ -275,7 +283,7 @@ class Jist {
   fetchFermenterSvg() {
     fetch('/images/fermenter.svg')
       .then(response => response.text())
-      .then(content => this.updateFermenterSvg(content))
+      .then(content => this.initFermenterSvg(content))
       .catch(error => {
         console.error(`fetch-fermenter-svg: error=${error}`);
       });
