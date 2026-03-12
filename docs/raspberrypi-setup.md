@@ -33,5 +33,6 @@
 - Install `pm2` to run the beer-bot: -`npm install -g pm2`
 - Start beer-bot with pm2:
   - `pm2 startup`: follow instructions given
-  - `pm2 start dist-server/server/server.js --name beer-bot`
+  - `pm2 start dist-pro/server.js --name beer-bot`
   - `pm2 save`
+ 
