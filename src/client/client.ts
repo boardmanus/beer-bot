@@ -1,9 +1,6 @@
 import { TiltPayload } from '../common/tiltpayload';
 import { Utils } from '../common/utils';
-import * as svg from '@svgdotjs/svg.js';
 import * as beerbot_config from '../config/config.json';
-
-svg.registerWindow(window, document);
 
 const SERVER_ADDRESS = beerbot_config?.server?.address ?? 'localhost';
 const SERVER_URL = `http://${SERVER_ADDRESS}:3000`;
@@ -70,16 +67,16 @@ class Jist {
   beerTemperature = document.getElementById('temperature') as HTMLElement;
   beerGravity = document.getElementById('gravity') as HTMLElement;
   beerAbv = document.getElementById('abv') as HTMLElement;
-  image = svg.SVG("#svgimage") as svg.Container;
-  svgBeer: svg.Rect | null = null;
-  svgBeerName: svg.Text | null = null;
-  svgBeerAbv: svg.Text | null = null;
-  svgTilt: svg.G | null = null;
-  svgTiltText: svg.Text | null = null;
-  svgTiltFrame: svg.Rect | null = null;
-  svgLiquidPath: svg.Path | null = null;
-  svgAnimation: svg.Element | null = null;
-  svgActivityLed: svg.Circle | null = null;
+  image = document.getElementById('svgimage') as unknown as SVGSVGElement;
+  svgBeer: SVGRectElement | null = null;
+  svgBeerName: SVGTextElement | null = null;
+  svgBeerAbv: SVGTextElement | null = null;
+  svgTilt: SVGGElement | null = null;
+  svgTiltText: SVGTextElement | null = null;
+  svgTiltFrame: SVGRectElement | null = null;
+  svgLiquidPath: SVGPathElement | null = null;
+  svgAnimation: SVGElement | null = null;
+  svgActivityLed: SVGCircleElement | null = null;
   lastBeerDetails = DEFAULT_BEER_DETAILS;
   lastTiltMeas = DEFAULT_MEAS;
 
@@ -124,10 +121,10 @@ class Jist {
   }
 
   updateTilt(meas: TiltPayload) {
-    this.svgTiltFrame.fill(TILT_COLOR_TO_FILL[meas.color]);
+    this.svgTiltFrame?.setAttribute('fill', TILT_COLOR_TO_FILL[meas.color] ?? '#ffffff');
 
     const text = `${meas.temperature.toFixed(1)}C, ${meas.gravity.toFixed(3)}SG`;
-    this.svgTiltText.text(text);
+    if (this.svgTiltText) { this.svgTiltText.textContent = text; }
 
     let tiltAngle = 10.0 + (meas.gravity - 1.0) * 600.0;
     if (tiltAngle > 70.0) {
@@ -135,12 +132,12 @@ class Jist {
     }
 
     const newRotation = 90.0 - tiltAngle;
-    this.svgTilt.attr('transform', `translate(38, 78) rotate(${newRotation})`);
+    this.svgTilt?.setAttribute('transform', `translate(38, 78) rotate(${newRotation})`);
   }
 
   blipActivityLed() {
-    this.svgActivityLed.fill("green");
-    const timeout = setTimeout(() => this.svgActivityLed.fill("none"), 200);
+    this.svgActivityLed?.setAttribute('fill', 'green');
+    setTimeout(() => this.svgActivityLed?.setAttribute('fill', 'none'), 200);
   }
 
   updateFermenterTilt(meas: TiltPayload) {
@@ -162,7 +159,7 @@ class Jist {
 
   updateBeerName(name: string, update = false) {
     if (validate_data(name, is_valid_beer_name, this.beerName)) {
-      this.svgBeerName?.text(name);
+      if (this.svgBeerName) { this.svgBeerName.textContent = name; }
       if (update) {
         this.beerName.value = name;
       }
@@ -172,7 +169,7 @@ class Jist {
   updateBeerColor(srm: number, update = false) {
     if (validate_data(srm, is_valid_beer_color, this.beerColor)) {
       const beerRgb = Utils.srm_to_rgb(srm);
-      this.svgBeer?.fill(Utils.rgba_style(beerRgb, 1.0));
+      this.svgBeer?.setAttribute('fill', Utils.rgba_style(beerRgb, 1.0));
       this.beerColor.style.backgroundColor = Utils.rgba_style(beerRgb, 0.3);
       if (update) {
         this.beerColor.value = String(srm);
@@ -186,10 +183,10 @@ class Jist {
     if (og && g && og > g) {
       const abv = `${Utils.gravity_to_abv(og, g).toFixed(1)}%`;
       this.beerAbv.innerText = abv;
-      this.svgBeerAbv?.text(abv);
+      if (this.svgBeerAbv) { this.svgBeerAbv.textContent = abv; }
     } else {
       this.beerAbv.innerText = '-';
-      this?.svgBeerAbv.text('');
+      if (this.svgBeerAbv) { this.svgBeerAbv.textContent = ''; }
     }
   }
 
@@ -217,16 +214,18 @@ class Jist {
     const svgDoc = parser.parseFromString(svgContents, 'image/svg+xml');
     const svgBody = svgDoc.querySelector('svg');
 
-    this.image.svg(svgBody.innerHTML).viewbox(0, 0, 80, 130);
-    this.svgBeer = this.image.findOne('#Beer') as svg.Rect;
-    this.svgBeerName = this.image.findOne('#BeerName') as svg.Text;
-    this.svgBeerAbv = this.image.findOne('#BeerAbv') as svg.Text;
-    this.svgTilt = this.image.findOne('#Tilt') as svg.G;
-    this.svgTiltText = this.image.findOne('#TiltDetails') as svg.Text;
-    this.svgTiltFrame = this.image.findOne('#TiltFrame') as svg.Rect;
-    this.svgLiquidPath = this.image.findOne('#Liquid') as svg.Path;
-    this.svgAnimation = this.image.findOne('#Animation') as svg.Element;
-    this.svgActivityLed = this.image.findOne('#ActivityLed') as svg.Circle;
+    this.image.innerHTML = svgBody.innerHTML;
+    this.image.setAttribute('viewBox', '0 0 80 130');
+
+    this.svgBeer = this.image.querySelector('#Beer') as SVGRectElement;
+    this.svgBeerName = this.image.querySelector('#BeerName') as SVGTextElement;
+    this.svgBeerAbv = this.image.querySelector('#BeerAbv') as SVGTextElement;
+    this.svgTilt = this.image.querySelector('#Tilt') as SVGGElement;
+    this.svgTiltText = this.image.querySelector('#TiltDetails') as SVGTextElement;
+    this.svgTiltFrame = this.image.querySelector('#TiltFrame') as SVGRectElement;
+    this.svgLiquidPath = this.image.querySelector('#Liquid') as SVGPathElement;
+    this.svgAnimation = this.image.querySelector('#Animation') as SVGElement;
+    this.svgActivityLed = this.image.querySelector('#ActivityLed') as SVGCircleElement;
 
     this.updateBeerDetails(this.lastBeerDetails);
     this.updateFermenterTilt(this.lastTiltMeas);
