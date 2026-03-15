@@ -11,6 +11,8 @@ type Deets = {
   og: number;
 };
 
+const ACTIVITY_LED_COLOR = 'green';
+
 const DEFAULT_BEER_DETAILS: Deets = {
   name: 'Beer pop',
   color_srm: 23.1,
@@ -28,6 +30,12 @@ const TILT_COLOR_TO_FILL: { [color: string]: string } = {
   Pink: '#f2baba',
   Orange: '#f2ba73'
 };
+
+const TILT_COLOR_DEFAULT = TILT_COLOR_TO_FILL.Purple;
+
+function tilt_color(color: string): string {
+  return TILT_COLOR_TO_FILL[color] ?? TILT_COLOR_DEFAULT;
+}
 
 function is_valid_beer_name(name: string) {
   return name.length > 0 && name.length < 64;
@@ -50,7 +58,6 @@ function validate_data<DataType>(
   if (valid) {
     input.classList.remove('invalid');
   } else {
-    console.log(`validate-data: invalid='${data}'`)
     if (!input.classList.contains('invalid')) {
       input.classList.add('invalid');
     }
@@ -58,158 +65,45 @@ function validate_data<DataType>(
   return valid;
 }
 
-class Jist {
-  tiltPayloadEvent = new EventSource(`${SERVER_URL}/tilt-meas`);
-  beerName = document.getElementById('beername') as HTMLInputElement;
-  beerColor = document.getElementById('beercolor') as HTMLInputElement;
-  beerOg = document.getElementById('og') as HTMLInputElement;
-  beerSubmit = document.getElementById('beersubmit') as HTMLButtonElement;
-  beerTemperature = document.getElementById('temperature') as HTMLElement;
-  beerGravity = document.getElementById('gravity') as HTMLElement;
-  beerAbv = document.getElementById('abv') as HTMLElement;
-  fermenter = document.getElementById('fermenter') as HTMLDivElement;
-  svgFermenter = this.fermenter.querySelector('#Fermenter') as SVGElement;
-  svgBeer = this.svgFermenter.querySelector('#Beer') as SVGRectElement;
-  svgBeerName = this.svgFermenter.querySelector('#BeerName') as SVGTextElement;
-  svgBeerAbv = this.svgFermenter.querySelector('#BeerAbv') as SVGTextElement;
-  svgTilt = this.svgFermenter.querySelector('#Tilt') as SVGGElement;
-  svgTiltText = this.svgFermenter.querySelector('#TiltDetails') as SVGTextElement;
-  svgTiltFrame = this.svgFermenter.querySelector('#TiltFrame') as SVGRectElement;
-  svgLiquidPath = this.svgFermenter.querySelector('#Liquid') as SVGPathElement;
-  svgAnimation = this.svgFermenter.querySelector('#Animation') as SVGElement;
-  svgActivityLed = this.svgFermenter.querySelector('#ActivityLed') as SVGCircleElement;
-  lastBeerDetails = DEFAULT_BEER_DETAILS;
-  lastTiltMeas = DEFAULT_MEAS;
+class BeerForm {
+  private beerName: HTMLInputElement = document.getElementById('beername') as HTMLInputElement;
+  private beerColor: HTMLInputElement = document.getElementById('beercolor') as HTMLInputElement;
+  private beerOg: HTMLInputElement = document.getElementById('og') as HTMLInputElement;
+  private beerSubmit: HTMLButtonElement = document.getElementById('beersubmit') as HTMLButtonElement;
+  private beerReload: HTMLButtonElement = document.getElementById('beerreload') as HTMLButtonElement;
+  private savedDeets: Deets = DEFAULT_BEER_DETAILS;
 
-  constructor() {
-
-    this.beerName.addEventListener('keyup', () => {
-      this.updateBeerName(this.beerName.value);
-      this.beerSubmit.disabled = !this.beerDetailsChanged(this.lastBeerDetails);
-    });
-
-    const beer_color_event = () => {
-      this.updateBeerColor(Number(this.beerColor.value));
-      this.beerSubmit.disabled = !this.beerDetailsChanged(this.lastBeerDetails);
-    };
-    this.beerColor.addEventListener('input', beer_color_event);
-    this.beerColor.addEventListener('keyup', beer_color_event);
-
-    const beer_og_event = () => {
-      this.updateBeerOg(Number(this.beerOg.value));
-      this.beerSubmit.disabled = !this.beerDetailsChanged(this.lastBeerDetails);
-    };
-    this.beerOg.addEventListener('input', beer_og_event);
-    this.beerOg.addEventListener('keyup', beer_og_event);
-
-    this.beerSubmit.addEventListener('click', () => this.submit_beer_details());
-
-    this.tiltPayloadEvent.onmessage = (event: MessageEvent) => this.updateFermenterTilt(JSON.parse(event.data));
-    this.tiltPayloadEvent.onerror = (event: Event) => console.error('EventSource failed:', event);
-
-    this.fetchBeerDetails();
-  }
-
-  beerDetailsChanged(deets: Deets): boolean {
-    return deets.og != Number(this.beerOg.value)
-      || deets.color_srm != Number(this.beerColor.value)
-      || deets.name != this.beerName.value;
-  }
-
-  updateAirlock(meas: TiltPayload) {
-    //jist.svgAnimation.attr("dur", `${meas.temperature}s`);
-  }
-
-  updateTilt(meas: TiltPayload) {
-    this.svgTiltFrame?.setAttribute('fill', TILT_COLOR_TO_FILL[meas.color] ?? '#ffffff');
-
-    const text = `${meas.temperature.toFixed(1)}C, ${meas.gravity.toFixed(3)}SG`;
-    if (this.svgTiltText) { this.svgTiltText.textContent = text; }
-
-    let tiltAngle = 10.0 + (meas.gravity - 1.0) * 600.0;
-    if (tiltAngle > 70.0) {
-      tiltAngle = 70.0;
+  constructor(
+    private onInputChanged: (deets: Deets) => void,
+    private onSubmit: (deets: Deets) => void,
+    private onReload: () => void,
+  ) {
+    if (!this.beerName || !this.beerColor || !this.beerOg || !this.beerSubmit) {
+      throw new Error('BeerForm: required form elements are not present in the DOM');
     }
 
-    const newRotation = 90.0 - tiltAngle;
-    this.svgTilt?.setAttribute('transform', `translate(38, 78) rotate(${newRotation})`);
+    this.beerName.addEventListener('keyup', () => this.onBeerNameEvent());
+    this.beerColor.addEventListener('input', () => this.onBeerColorEvent());
+    this.beerColor.addEventListener('keyup', () => this.onBeerColorEvent());
+    this.beerOg.addEventListener('input', () => this.onBeerOgEvent());
+    this.beerOg.addEventListener('keyup', () => this.onBeerOgEvent());
+    this.beerSubmit.addEventListener('click', () => this.onSubmit(this.current()));
+    this.beerReload.addEventListener('click', () => this.onReload());
   }
 
-  blipActivityLed() {
-    this.svgActivityLed?.setAttribute('fill', 'green');
-    setTimeout(() => this.svgActivityLed?.setAttribute('fill', 'none'), 200);
+  update(deets: Deets) {
+    this.savedDeets = deets;
+    this.beerName.value = deets.name;
+    this.beerColor.value = String(deets.color_srm);
+    this.beerOg.value = String(deets.og);;
+    this.onBeerDetailsUpdated();
   }
 
-  updateFermenterTilt(meas: TiltPayload) {
-    this.updateMeas(meas);
-    this.updateTilt(meas);
-    this.updateAirlock(meas);
-    this.blipActivityLed();
+  private updateSubmit() {
+    this.beerSubmit.disabled = !this.hasChanges();
   }
 
-  updateBeerOg(og: number, update = false) {
-    console.log(`update-beer-og: ${og}`);
-    if (validate_data(og, is_valid_beer_og, this.beerOg)) {
-      this.updateBeerAbv(og, this.lastTiltMeas.gravity);
-      if (update) {
-        this.beerOg.value = String(og);
-      }
-    }
-  }
-
-  updateBeerName(name: string, update = false) {
-    if (validate_data(name, is_valid_beer_name, this.beerName)) {
-      if (this.svgBeerName) { this.svgBeerName.textContent = name; }
-      if (update) {
-        this.beerName.value = name;
-      }
-    }
-  }
-
-  updateBeerColor(srm: number, update = false) {
-    if (validate_data(srm, is_valid_beer_color, this.beerColor)) {
-      const beerRgb = Utils.srm_to_rgb(srm);
-      this.svgBeer?.setAttribute('fill', Utils.rgba_style(beerRgb, 1.0));
-      this.beerColor.style.backgroundColor = Utils.rgba_style(beerRgb, 0.3);
-      if (update) {
-        this.beerColor.value = String(srm);
-      }
-    } else {
-      this.beerColor.style.backgroundColor = '';
-    }
-  }
-
-  updateBeerAbv(og: number, g: number) {
-    if (og && g && og > g) {
-      const abv = `${Utils.gravity_to_abv(og, g).toFixed(1)}%`;
-      this.beerAbv.innerText = abv;
-      if (this.svgBeerAbv) { this.svgBeerAbv.textContent = abv; }
-    } else {
-      this.beerAbv.innerText = '-';
-      if (this.svgBeerAbv) { this.svgBeerAbv.textContent = ''; }
-    }
-  }
-
-  updateMeas(meas: TiltPayload) {
-    this.beerTemperature.innerText = `${meas.temperature.toFixed(1)}C`;
-    this.beerGravity.innerText = `${meas.gravity.toFixed(3)}SG`;
-    this.updateBeerAbv(this.lastBeerDetails.og, meas.gravity);
-    this.lastTiltMeas = meas;
-  }
-
-  updateBeerDetails(deets: Deets, disable = false) {
-    console.log('update-beer-details: ', deets);
-    this.updateBeerName(deets.name, true);
-    this.updateBeerColor(deets.color_srm, true);
-    this.updateBeerOg(deets.og, true);
-    this.lastBeerDetails = deets;
-    this.beerName.disabled = disable;
-    this.beerColor.disabled = disable;
-    this.beerOg.disabled = disable;
-    this.beerSubmit.disabled = disable || !this.beerDetailsChanged(deets);
-  }
-
-  deets(): Deets {
+  private current(): Deets {
     return {
       name: this.beerName.value,
       color_srm: Number(this.beerColor.value),
@@ -217,48 +111,167 @@ class Jist {
     };
   }
 
-  submit_beer_details() {
-    const deets = this.deets();
-    this.updateBeerName(deets.name, true);
-    this.updateBeerColor(deets.color_srm, true);
-    this.updateBeerOg(deets.og, true);
-    this.updateBeerAbv(deets.og, this.lastTiltMeas.gravity);
-    this.beerSubmit.disabled = true;
-    this.postBeerDetails(deets);
+  private hasChanges(): boolean {
+    return this.savedDeets.og !== Number(this.beerOg.value)
+      || this.savedDeets.color_srm !== Number(this.beerColor.value)
+      || this.savedDeets.name !== this.beerName.value;
   }
 
-  postBeerDetails(deets: Deets) {
-    console.log(`post-beer-details: deets=${deets}`);
-    fetch(`${SERVER_URL}/beer-details`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(deets),
-    }).then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok: ' + response.statusText);
-      }
-      return response.json();
-    }).then(json => {
-      console.log(`post-beer-details: response=${json}`);
-      this.updateBeerDetails(JSON.parse(json));
-    }).catch(error => {
-      console.error(`post-beer-details: error=${error}`);
-    });
+  private onBeerDetailsUpdated() {
+    const deets = this.current();
+    const beerRgb = Utils.srm_to_rgb(deets.color_srm);
+    this.beerColor.style.backgroundColor = Utils.rgba_style(beerRgb, 0.3);
+    this.updateSubmit();
+    this.onInputChanged(deets);
   }
 
-  fetchBeerDetails() {
-    fetch(`${SERVER_URL}/beer-details`)
-      .then(response => response.json())
-      .then(msg => this.updateBeerDetails(JSON.parse(msg)))
-      .catch(error => {
-        console.error(`fetch-beer-details: error=${error}`);
-      });
+  private onBeerColorEvent() {
+    if (validate_data(Number(this.beerColor.value), is_valid_beer_color, this.beerColor)) {
+      this.onBeerDetailsUpdated();
+    }
+  }
+
+  private onBeerOgEvent() {
+    if (validate_data(Number(this.beerOg.value), is_valid_beer_og, this.beerOg)) {
+      this.onBeerDetailsUpdated();
+    }
+  }
+
+  private onBeerNameEvent() {
+    if (validate_data(this.beerName.value, is_valid_beer_name, this.beerName)) {
+      this.onBeerDetailsUpdated();
+    }
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM Contents loaded...");
-  const jist = new Jist();
-});
+class FermenterSvg {
+  private svgBeer = document.querySelector('#Beer') as SVGRectElement;
+  private svgBeerName = document.querySelector('#BeerName') as SVGTextElement;
+  private svgBeerAbv = document.querySelector('#BeerAbv') as SVGTextElement;
+  private svgTilt = document.querySelector('#Tilt') as SVGGElement;
+  private svgTiltText = document.querySelector('#TiltDetails') as SVGTextElement;
+  private svgTiltFrame = document.querySelector('#TiltFrame') as SVGRectElement;
+  private svgActivityLed = document.querySelector('#ActivityLed') as SVGCircleElement;
+
+  constructor() {
+    if (!this.svgBeer || !this.svgBeerName || !this.svgBeerAbv || !this.svgTilt || !this.svgTiltText || !this.svgTiltFrame || !this.svgActivityLed) {
+      throw new Error('FermenterDisplay: required SVG elements are not all present');
+    }
+  }
+
+  update(deets: Deets, meas: TiltPayload, blipLed = false) {
+    this.svgBeerName.textContent = deets.name;
+    this.svgBeer.setAttribute('fill', Utils.rgba_style(Utils.srm_to_rgb(deets.color_srm), 1.0));
+    this.svgTiltFrame.setAttribute('fill', tilt_color(meas.color));
+    this.svgTiltText.textContent = `${meas.temperature.toFixed(1)}C, ${meas.gravity.toFixed(3)}SG`;
+    this.svgBeerAbv.textContent = `${Utils.gravity_to_abv(deets.og, meas.gravity).toFixed(1)}%`;
+    const tiltAngle = Math.min(70.0, 10.0 + (meas.gravity - 1.0) * 600.0);
+    this.svgTilt.setAttribute('transform', `translate(38, 78) rotate(${90.0 - tiltAngle})`);
+
+    if (blipLed) {
+      this.svgActivityLed.setAttribute('fill', ACTIVITY_LED_COLOR);
+      setTimeout(() => this.svgActivityLed.setAttribute('fill', 'none'), 200);
+    }
+  }
+}
+
+class BeerStatus {
+  private abvStatus = document.getElementById('abv');
+  private temperatureStatus = document.getElementById('temperature');
+  private gravityStatus = document.getElementById('gravity');
+
+  constructor() {
+    if (!this.abvStatus || !this.gravityStatus || !this.temperatureStatus) {
+      throw new Error('BeerStatus: required elements are not all present');
+    }
+  }
+
+  update(deets: Deets, meas: TiltPayload) {
+    const measuredAbv = Utils.gravity_to_abv(deets.og, meas.gravity);
+    this.abvStatus.innerText = `${measuredAbv.toFixed(1)}%`;
+    this.temperatureStatus.innerText = `${meas.temperature.toFixed(1)}C`;
+    this.gravityStatus.innerText = `${meas.gravity.toFixed(3)}SG`;
+  }
+}
+
+class BeerDetailsService {
+  async get(): Promise<Deets> {
+    const res = await fetch(`${SERVER_URL}/beer-details`);
+    const payload = await res.json();
+    return JSON.parse(payload);
+  }
+
+  async post(deets: Deets): Promise<Deets> {
+    const res = await fetch(`${SERVER_URL}/beer-details`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(deets),
+    });
+    if (!res.ok) throw new Error(`Network response not ok: ${res.statusText}`);
+    const body = await res.json();
+    return JSON.parse(body);
+  }
+}
+
+class Jist {
+  private tiltSource = new EventSource('/tilt-meas');
+  private beerForm: BeerForm;
+  private beerStatus: BeerStatus;
+  private fermenterSvg: FermenterSvg;
+  private beerService = new BeerDetailsService();
+  private lastTilt: TiltPayload = DEFAULT_MEAS;
+  private lastDeets: Deets = DEFAULT_BEER_DETAILS;
+
+  constructor() {
+
+    this.fermenterSvg = new FermenterSvg();
+    this.beerStatus = new BeerStatus();
+
+    this.beerForm = new BeerForm(
+      deets => this.onBeerDetails(deets),
+      deets => this.submitBeerDetails(deets),
+      () => this.fetchBeerDetails()
+    );
+
+    this.tiltSource.onmessage = (event: MessageEvent) => this.onTiltUpdate(JSON.parse(event.data));
+    this.tiltSource.onerror = event => console.error('jist: EventSource failed:', event);
+
+    this.beerForm.update(this.lastDeets);
+    this.beerStatus.update(this.lastDeets, this.lastTilt);
+    this.fermenterSvg.update(this.lastDeets, this.lastTilt);
+    this.fetchBeerDetails();
+  }
+
+  private async fetchBeerDetails() {
+    try {
+
+      const deets = await this.beerService.get();
+      this.beerForm.update(deets);
+    } catch (error) {
+      console.error(`jist: fetch-beer-details: ${error}`);
+    }
+  }
+
+  private async submitBeerDetails(deets: Deets) {
+    try {
+      const savedDeets = await this.beerService.post(deets);
+      this.beerForm.update(savedDeets);
+    } catch (error) {
+      console.error('jist: submit-beer-details:', error);
+    }
+  }
+
+  private onBeerDetails(deets: Deets) {
+    this.lastDeets = deets;
+    this.fermenterSvg.update(deets, this.lastTilt);
+    this.beerStatus.update(deets, this.lastTilt);
+  }
+
+  private onTiltUpdate(meas: TiltPayload) {
+    this.lastTilt = meas;
+    this.fermenterSvg.update(this.lastDeets, meas, true);
+    this.beerStatus.update(this.lastDeets, meas);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => new Jist());
