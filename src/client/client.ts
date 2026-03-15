@@ -67,16 +67,17 @@ class Jist {
   beerTemperature = document.getElementById('temperature') as HTMLElement;
   beerGravity = document.getElementById('gravity') as HTMLElement;
   beerAbv = document.getElementById('abv') as HTMLElement;
-  image = document.getElementById('svgimage') as unknown as SVGSVGElement;
-  svgBeer: SVGRectElement | null = null;
-  svgBeerName: SVGTextElement | null = null;
-  svgBeerAbv: SVGTextElement | null = null;
-  svgTilt: SVGGElement | null = null;
-  svgTiltText: SVGTextElement | null = null;
-  svgTiltFrame: SVGRectElement | null = null;
-  svgLiquidPath: SVGPathElement | null = null;
-  svgAnimation: SVGElement | null = null;
-  svgActivityLed: SVGCircleElement | null = null;
+  fermenter = document.getElementById('fermenter') as HTMLDivElement;
+  svgFermenter = this.fermenter.querySelector('#Fermenter') as SVGElement;
+  svgBeer = this.svgFermenter.querySelector('#Beer') as SVGRectElement;
+  svgBeerName = this.svgFermenter.querySelector('#BeerName') as SVGTextElement;
+  svgBeerAbv = this.svgFermenter.querySelector('#BeerAbv') as SVGTextElement;
+  svgTilt = this.svgFermenter.querySelector('#Tilt') as SVGGElement;
+  svgTiltText = this.svgFermenter.querySelector('#TiltDetails') as SVGTextElement;
+  svgTiltFrame = this.svgFermenter.querySelector('#TiltFrame') as SVGRectElement;
+  svgLiquidPath = this.svgFermenter.querySelector('#Liquid') as SVGPathElement;
+  svgAnimation = this.svgFermenter.querySelector('#Animation') as SVGElement;
+  svgActivityLed = this.svgFermenter.querySelector('#ActivityLed') as SVGCircleElement;
   lastBeerDetails = DEFAULT_BEER_DETAILS;
   lastTiltMeas = DEFAULT_MEAS;
 
@@ -106,7 +107,6 @@ class Jist {
     this.tiltPayloadEvent.onmessage = (event: MessageEvent) => this.updateFermenterTilt(JSON.parse(event.data));
     this.tiltPayloadEvent.onerror = (event: Event) => console.error('EventSource failed:', event);
 
-    this.fetchFermenterSvg();
     this.fetchBeerDetails();
   }
 
@@ -209,28 +209,6 @@ class Jist {
     this.beerSubmit.disabled = disable || !this.beerDetailsChanged(deets);
   }
 
-  initFermenterSvg(svgContents: string) {
-    const parser = new DOMParser();
-    const svgDoc = parser.parseFromString(svgContents, 'image/svg+xml');
-    const svgBody = svgDoc.querySelector('svg');
-
-    this.image.innerHTML = svgBody.innerHTML;
-    this.image.setAttribute('viewBox', '0 0 80 130');
-
-    this.svgBeer = this.image.querySelector('#Beer') as SVGRectElement;
-    this.svgBeerName = this.image.querySelector('#BeerName') as SVGTextElement;
-    this.svgBeerAbv = this.image.querySelector('#BeerAbv') as SVGTextElement;
-    this.svgTilt = this.image.querySelector('#Tilt') as SVGGElement;
-    this.svgTiltText = this.image.querySelector('#TiltDetails') as SVGTextElement;
-    this.svgTiltFrame = this.image.querySelector('#TiltFrame') as SVGRectElement;
-    this.svgLiquidPath = this.image.querySelector('#Liquid') as SVGPathElement;
-    this.svgAnimation = this.image.querySelector('#Animation') as SVGElement;
-    this.svgActivityLed = this.image.querySelector('#ActivityLed') as SVGCircleElement;
-
-    this.updateBeerDetails(this.lastBeerDetails);
-    this.updateFermenterTilt(this.lastTiltMeas);
-  }
-
   deets(): Deets {
     return {
       name: this.beerName.value,
@@ -276,15 +254,6 @@ class Jist {
       .then(msg => this.updateBeerDetails(JSON.parse(msg)))
       .catch(error => {
         console.error(`fetch-beer-details: error=${error}`);
-      });
-  }
-
-  fetchFermenterSvg() {
-    fetch('/images/fermenter.svg')
-      .then(response => response.text())
-      .then(content => this.initFermenterSvg(content))
-      .catch(error => {
-        console.error(`fetch-fermenter-svg: error=${error}`);
       });
   }
 }

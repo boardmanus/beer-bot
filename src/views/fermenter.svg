@@ -5,11 +5,9 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   width="240"
-   height="390"
    viewBox="0 0 80 130"
    version="1.1"
-   id="Fermentation">
+   id="Fermenter">
   <path
      id="Bung"
      d="M 36,58 H 32 L 26,43 h 10 m 5,0 h 10 l -5,15 h -5"
