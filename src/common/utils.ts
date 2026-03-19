@@ -7,17 +7,6 @@ class Utils {
     return (c * 9.0) / 5.0 + 32.0;
   }
 
-  static low_pass_filter(
-    x1: number,
-    xf0: number,
-    dt: number,
-    rc: number
-  ): number {
-    const alpha = dt / (rc + dt);
-    const xf1 = xf0 + alpha * (x1 - xf0);
-    return xf1;
-  }
-
   static noise(factor: number): number {
     return (Math.random() - 0.5) * factor;
   }
