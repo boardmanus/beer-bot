@@ -21,7 +21,7 @@ class Cloud {
   private tFilter = new LowPassFilter(TEMPERATURE_RC);
   private gFilter = new LowPassFilter(GRAVITY_RC);
 
-  constructor(beerName = "Unamed Beer") {
+  constructor(beerName = 'Unnamed Beer') {
     this.beerName = beerName;
     this.lastReportedPayload = null;
   }

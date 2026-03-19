@@ -16,7 +16,7 @@ import express, { Express, Request, Response } from 'express';
 const PORT = 3000;
 const BEER_CONFIG_PATH = path.join(__dirname, 'config/beer_config.json');
 const LCDd_ADDRESS = beerbot_config?.server?.LCDd ?? 'localhost';
-const DEFAULT_BEER_NAME = "Unnamed Beer";
+const DEFAULT_BEER_NAME = 'Unnamed Beer';
 
 type TiltRequest = Request<{
   uuid: string;
@@ -27,8 +27,8 @@ type TiltRequest = Request<{
 
 type BeerDetailsRequest = Request<{
   name: string;
-  color_srm: number,
-  og: number
+  color_srm: number;
+  og: number;
 }>;
 
 function create_io_server(app: Express): https.Server | http.Server {
@@ -64,14 +64,7 @@ function handle_get_root(_req: Request, res: Response) {
 }
 
 function handle_post_tilt_meas(req: TiltRequest, res: Response) {
-  handle_tilt_payload(
-    new TiltPayload(
-      req.params.uuid,
-      req.params.temperature,
-      req.params.gravity,
-      req.params.rssi
-    )
-  );
+  handle_tilt_payload(new TiltPayload(req.params.uuid, req.params.temperature, req.params.gravity, req.params.rssi));
   res.end('yes');
 }
 
@@ -112,6 +105,6 @@ app.use(bodyParser.json());
 
 app.get('/', handle_get_root);
 app.post('/beer-details', handle_post_beer_details);
-app.get('/beer-details', handle_req_beer_details)
+app.get('/beer-details', handle_req_beer_details);
 app.post('/tilt-meas', handle_post_tilt_meas);
-app.get('/tilt-meas', handle_sse_tilt_meas_connection)
+app.get('/tilt-meas', handle_sse_tilt_meas_connection);

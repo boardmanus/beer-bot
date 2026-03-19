@@ -1,5 +1,5 @@
-import { LowPassFilter } from "../common/low_pass_filter";
-import { TiltPayload } from "../common/tiltpayload";
+import { LowPassFilter } from '../common/low_pass_filter';
+import { TiltPayload } from '../common/tiltpayload';
 import { Request, Response } from 'express';
 
 const RC = 60;
@@ -11,8 +11,7 @@ export class Client {
   private tFilter = new LowPassFilter(TEMPERATURE_RC);
   private tiltPayloadResponse: Response | null = null;
 
-  constructor() {
-  }
+  constructor() {}
 
   onPayload(payload: TiltPayload) {
     const rawGravity = payload.gravity;
@@ -24,14 +23,14 @@ export class Client {
   }
 
   handleSseTiltMeasConnection(req: Request, res: Response) {
-    console.log("handle-sse-tilt-meas-connection: connecting to client...");
+    console.log('handle-sse-tilt-meas-connection: connecting to client...');
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     this.tiltPayloadResponse = res;
 
     req.on('close', () => {
-      console.log("Connection to client closed.");
+      console.log('Connection to client closed.');
       this.tiltPayloadResponse = null;
       res.end();
     });

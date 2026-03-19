@@ -18,6 +18,8 @@
     "build:client:pro": "esbuild src/client/client.ts --sourcemap --platform=browser --bundle --minify --outfile=dist-pro/public/scripts/client.js --metafile=client-pro-metafile.json",
     "build:server:pro": "esbuild src/server/server.ts --sourcemap --platform=node --bundle --packages=external --minify --outfile=dist-pro/server.js --metafile=server-pro-metafile.json",
     "test": "jest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "check:server": "tsc --noEmit --project src/server/tsconfig.json",
     "check:client": "tsc --noEmit --project src/client/tsconfig.json",
     "check": "pnpm run check:server && pnpm run check:client"
@@ -50,6 +52,8 @@
   },
   "devDependencies": {
     "@eslint/config-array": "^0.23.3",
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^10.0.1",
     "@eslint/object-schema": "^3.0.3",
     "@types/body-parser": "^1.19.6",
     "@types/express": "^5.0.6",

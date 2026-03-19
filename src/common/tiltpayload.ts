@@ -1,13 +1,6 @@
 import { Utils } from './utils';
 
-type TiltColor =
-  | 'Green'
-  | 'Red'
-  | 'Black'
-  | 'Purple'
-  | 'Orange'
-  | 'Blue'
-  | 'Pink';
+type TiltColor = 'Green' | 'Red' | 'Black' | 'Purple' | 'Orange' | 'Blue' | 'Pink';
 
 // Identifies the TILT Hydrometer available
 const TILT_UUIDS: { [uuid: string]: TiltColor } = {
@@ -32,12 +25,7 @@ class TiltPayload {
   rssi: number;
   color: TiltColor;
 
-  constructor(
-    uuid: string,
-    temperature: number,
-    gravity: number,
-    rssi: number
-  ) {
+  constructor(uuid: string, temperature: number, gravity: number, rssi: number) {
     // Build the payload by default
     this.uuid = uuid;
     this.timestamp = Date.now() / 1000.0;

@@ -2,12 +2,7 @@ import { TiltPayload } from '../tiltpayload';
 
 describe('TiltPayload', () => {
   it('should build payload with normalized UUID, temperature, and color', () => {
-    const payload = new TiltPayload(
-      'a495bb20-c5b1-4b44-b512-1370f02d74de',
-      68.0,
-      1.05,
-      -50
-    );
+    const payload = new TiltPayload('a495bb20-c5b1-4b44-b512-1370f02d74de', 68.0, 1.05, -50);
 
     expect(payload.uuid).toBe('a495bb20-c5b1-4b44-b512-1370f02d74de');
     expect(payload.color).toBe('Green');
@@ -18,12 +13,7 @@ describe('TiltPayload', () => {
   });
 
   it('should report invalid when UUID is not known', () => {
-    const payload = new TiltPayload(
-      '00000000-0000-0000-0000-000000000000',
-      68.0,
-      1.05,
-      -50
-    );
+    const payload = new TiltPayload('00000000-0000-0000-0000-000000000000', 68.0, 1.05, -50);
 
     expect(payload.color).toBeUndefined();
     expect(payload.isValid()).toBe(false);

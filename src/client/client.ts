@@ -49,11 +49,7 @@ function is_valid_beer_og(og: number) {
   return og >= 1.0 && og <= 1.15;
 }
 
-function validate_data<DataType>(
-  data: DataType,
-  is_valid_func: (val: DataType) => boolean,
-  input: HTMLInputElement
-) {
+function validate_data<DataType>(data: DataType, is_valid_func: (val: DataType) => boolean, input: HTMLInputElement) {
   const valid = is_valid_func(data);
   if (valid) {
     input.classList.remove('invalid');
@@ -76,7 +72,7 @@ class BeerForm {
   constructor(
     private onInputChanged: (deets: Deets) => void,
     private onSubmit: (deets: Deets) => void,
-    private onReload: () => void,
+    private onReload: () => void
   ) {
     if (!this.beerName || !this.beerColor || !this.beerOg || !this.beerSubmit) {
       throw new Error('BeerForm: required form elements are not present in the DOM');
@@ -95,7 +91,7 @@ class BeerForm {
     this.savedDeets = deets;
     this.beerName.value = deets.name;
     this.beerColor.value = String(deets.color_srm);
-    this.beerOg.value = String(deets.og);;
+    this.beerOg.value = String(deets.og);
     this.onBeerDetailsUpdated();
   }
 
@@ -112,9 +108,11 @@ class BeerForm {
   }
 
   private hasChanges(): boolean {
-    return this.savedDeets.og !== Number(this.beerOg.value)
-      || this.savedDeets.color_srm !== Number(this.beerColor.value)
-      || this.savedDeets.name !== this.beerName.value;
+    return (
+      this.savedDeets.og !== Number(this.beerOg.value) ||
+      this.savedDeets.color_srm !== Number(this.beerColor.value) ||
+      this.savedDeets.name !== this.beerName.value
+    );
   }
 
   private onBeerDetailsUpdated() {
@@ -154,7 +152,15 @@ class FermenterSvg {
   private svgActivityLed = document.querySelector('#ActivityLed') as SVGCircleElement;
 
   constructor() {
-    if (!this.svgBeer || !this.svgBeerName || !this.svgBeerAbv || !this.svgTilt || !this.svgTiltText || !this.svgTiltFrame || !this.svgActivityLed) {
+    if (
+      !this.svgBeer ||
+      !this.svgBeerName ||
+      !this.svgBeerAbv ||
+      !this.svgTilt ||
+      !this.svgTiltText ||
+      !this.svgTiltFrame ||
+      !this.svgActivityLed
+    ) {
       throw new Error('FermenterDisplay: required SVG elements are not all present');
     }
   }
@@ -205,7 +211,7 @@ class BeerDetailsService {
     const res = await fetch(`${SERVER_URL}/beer-details`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(deets),
+      body: JSON.stringify(deets)
     });
     if (!res.ok) throw new Error(`Network response not ok: ${res.statusText}`);
     const body = await res.json();
@@ -223,18 +229,17 @@ class Jist {
   private lastDeets: Deets = DEFAULT_BEER_DETAILS;
 
   constructor() {
-
     this.fermenterSvg = new FermenterSvg();
     this.beerStatus = new BeerStatus();
 
     this.beerForm = new BeerForm(
-      deets => this.onBeerDetails(deets),
-      deets => this.submitBeerDetails(deets),
+      (deets) => this.onBeerDetails(deets),
+      (deets) => this.submitBeerDetails(deets),
       () => this.fetchBeerDetails()
     );
 
     this.tiltSource.onmessage = (event: MessageEvent) => this.onTiltUpdate(JSON.parse(event.data));
-    this.tiltSource.onerror = event => console.error('jist: EventSource failed:', event);
+    this.tiltSource.onerror = (event) => console.error('jist: EventSource failed:', event);
 
     this.beerForm.update(this.lastDeets);
     this.beerStatus.update(this.lastDeets, this.lastTilt);
@@ -244,7 +249,6 @@ class Jist {
 
   private async fetchBeerDetails() {
     try {
-
       const deets = await this.beerService.get();
       this.beerForm.update(deets);
     } catch (error) {

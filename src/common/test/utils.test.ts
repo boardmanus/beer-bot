@@ -9,11 +9,11 @@ describe('Utils', () => {
   });
 
   it('gravity_to_abv works per formula', () => {
-    expect(Utils.gravity_to_abv(1.050, 1.010)).toBeCloseTo(5.25);
+    expect(Utils.gravity_to_abv(1.05, 1.01)).toBeCloseTo(5.25);
   });
 
   it('rgba_style prints correct string', () => {
-    expect(Utils.gravity_to_abv(1.050, 1.010)).toBeCloseTo(5.25);
+    expect(Utils.gravity_to_abv(1.05, 1.01)).toBeCloseTo(5.25);
   });
 
   it('rgba_style prints correct string', () => {

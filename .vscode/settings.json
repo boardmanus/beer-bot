@@ -1,4 +1,22 @@
 {
   "editor.tabSize": 2,
-  "editor.rulers": [80, 120]
+  "editor.rulers": [
+    80,
+    120
+  ],
+  "eslint.enable": true,
+  "eslint.validate": [
+    "javascript",
+    "typescript",
+    "javascriptreact",
+    "typescriptreact"
+  ],
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
 }
