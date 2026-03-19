@@ -46,9 +46,7 @@
     "express": "^5.2.1",
     "needle": "^3.5.0",
     "node-beacon-scanner": "^0.2.2",
-    "pug": "^3.0.4",
-    "socket.io": "^4.8.3",
-    "socket.io-client": "^4.8.3"
+    "pug": "^3.0.4"
   },
   "devDependencies": {
     "@eslint/config-array": "^0.23.3",
