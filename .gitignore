@@ -3,7 +3,9 @@ node_modules
 src/config/config.json
 src/config/*.pem
 package-lock.json
+dist-client/
 dist-dev/
 dist-pro/
+dist-server/
 tsconfig.json
 *-metafile.json
