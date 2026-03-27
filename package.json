@@ -60,8 +60,8 @@
     "@types/jest": "^30.0.0",
     "@types/needle": "^3.3.0",
     "@types/node": "^25.5.0",
-    "@typescript-eslint/eslint-plugin": "^8.57.1",
-    "@typescript-eslint/parser": "^8.57.1",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
+    "@typescript-eslint/parser": "^8.57.2",
     "es-jest": "^2.1.0",
     "esbuild": "^0.27.4",
     "esbuild-node-tsc": "^2.0.5",
@@ -76,7 +76,8 @@
   },
   "pnpm": {
     "overrides": {
-      "tar": "^7.5.11"
+      "tar": "^7.5.11",
+      "brace-expansion": "^1.1.13"
     }
   }
 }
