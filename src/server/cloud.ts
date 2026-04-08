@@ -46,9 +46,9 @@ class Cloud {
   }
 
   onPayload(payload: TiltPayload) {
+    const cloudData = this.payloadToCloud(this.beerName, payload);
     if (this.reportToCloud(payload)) {
       this.lastReportedPayload = payload;
-      const cloudData = this.payloadToCloud(this.beerName, payload);
 
       request.post(
         CLOUD_URL,

@@ -25,10 +25,10 @@ class TiltPayload {
   rssi: number;
   color: TiltColor;
 
-  constructor(uuid: string, temperature: number, gravity: number, rssi: number) {
+  constructor(uuid: string, temperature: number, gravity: number, rssi: number, timestamp = Date.now() / 1000.0) {
     // Build the payload by default
     this.uuid = uuid;
-    this.timestamp = Date.now() / 1000.0;
+    this.timestamp = timestamp;
     this.temperature = Utils.f_to_c(temperature);
     this.gravity = gravity;
     this.rssi = rssi;
