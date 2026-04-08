@@ -51,28 +51,28 @@
     "pug": "^3.0.4"
   },
   "devDependencies": {
-    "@eslint/config-array": "^0.23.3",
+    "@eslint/config-array": "^0.23.4",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
-    "@eslint/object-schema": "^3.0.3",
+    "@eslint/object-schema": "^3.0.4",
     "@types/body-parser": "^1.19.6",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/needle": "^3.3.0",
-    "@types/node": "^25.5.0",
-    "@typescript-eslint/eslint-plugin": "^8.57.2",
-    "@typescript-eslint/parser": "^8.57.2",
+    "@types/node": "^25.5.2",
+    "@typescript-eslint/eslint-plugin": "^8.58.1",
+    "@typescript-eslint/parser": "^8.58.1",
     "es-jest": "^2.1.0",
-    "esbuild": "^0.27.4",
+    "esbuild": "^0.28.0",
     "esbuild-node-tsc": "^2.0.5",
     "esbuild-plugin-pug": "^0.0.8",
-    "eslint": "^10.1.0",
+    "eslint": "^10.2.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "jest": "^30.3.0",
     "nodemon": "^3.1.14",
     "prettier": "^3.8.1",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   },
   "pnpm": {
     "overrides": {
