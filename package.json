@@ -63,7 +63,7 @@
     "@typescript-eslint/eslint-plugin": "^8.58.1",
     "@typescript-eslint/parser": "^8.58.1",
     "es-jest": "^2.1.0",
-    "esbuild": "^0.28.0",
+    "esbuild": "^0.28.1",
     "esbuild-node-tsc": "^2.0.5",
     "esbuild-plugin-pug": "^0.0.8",
     "eslint": "^10.2.0",
